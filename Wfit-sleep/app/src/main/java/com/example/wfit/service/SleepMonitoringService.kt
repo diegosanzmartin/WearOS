@@ -171,15 +171,8 @@ class SleepMonitoringService : LifecycleService() {
     }
 
     private fun stopForegroundAndSelf() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            stopForeground(STOPFOREGROUND_REMOVE)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            @Suppress("DEPRECATION")
-            stopForeground(true)
-        } else {
-            @Suppress("DEPRECATION")
-            stopForeground(true)
-        }
+        @Suppress("DEPRECATION")
+        stopForeground(true)
         stopSelf()
     }
 
