@@ -5,6 +5,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.wear.compose.material.Text
 import androidx.compose.ui.Alignment
@@ -30,10 +32,64 @@ fun DailySleepCarousel(
     ) {
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxSize()
         ) { page ->
             val dailyData = sleepDataList[page]
-            DailySleepCard(dailyData)
+            val scrollState = rememberScrollState()
+            
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                DailySleepCard(dailyData)
+                
+                // Información adicional que se puede scrollear
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Detalles de las fases
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Text(
+                        text = "Detalles del sueño",
+                        fontSize = 16.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                    )
+                    
+                    // Tiempo en cada fase
+                    PhaseTimeDetail("Sueño profundo", 
+                        dailyData.cycles
+                            .filter { it.phase == com.example.wfit.presentation.model.SleepPhase.DEEP_SLEEP }
+                            .sumOf { it.durationMinutes }
+                    )
+                    PhaseTimeDetail("Sueño ligero", 
+                        dailyData.cycles
+                            .filter { it.phase == com.example.wfit.presentation.model.SleepPhase.LIGHT_SLEEP }
+                            .sumOf { it.durationMinutes }
+                    )
+                    PhaseTimeDetail("REM", 
+                        dailyData.cycles
+                            .filter { it.phase == com.example.wfit.presentation.model.SleepPhase.REM }
+                            .sumOf { it.durationMinutes }
+                    )
+                    PhaseTimeDetail("Despierto", 
+                        dailyData.cycles
+                            .filter { it.phase == com.example.wfit.presentation.model.SleepPhase.AWAKE }
+                            .sumOf { it.durationMinutes }
+                    )
+                }
+                
+                // Espacio adicional al final para asegurar que todo es scrolleable
+                Spacer(modifier = Modifier.height(32.dp))
+            }
         }
     }
 }
@@ -63,10 +119,10 @@ private fun DailySleepCard(
             sleepData = dailyData,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(120.dp)
+                .height(140.dp)
         )
         
-        // Estadísticas
+        // Estadísticas principales
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -76,6 +132,31 @@ private fun DailySleepCard(
             StatisticItem("Total", "${dailyData.totalSleepTime}min")
             StatisticItem("Score", "${dailyData.sleepScore}%")
         }
+    }
+}
+
+@Composable
+private fun PhaseTimeDetail(
+    phase: String,
+    minutes: Int,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = phase,
+            fontSize = 14.sp,
+            color = Color.White.copy(alpha = 0.8f)
+        )
+        Text(
+            text = "${minutes}min",
+            fontSize = 14.sp,
+            color = Color.White.copy(alpha = 0.8f)
+        )
     }
 }
 
