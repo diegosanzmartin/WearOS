@@ -34,11 +34,8 @@ class SleepViewModel(
         // Add test data for today
         viewModelScope.launch {
             val today = LocalDate.now()
-            // Borrar datos de hoy antes de insertar los nuevos
-            database.sleepCycleDao().deleteSleepCyclesBetween(
-                today.atStartOfDay(),
-                today.plusDays(1).atStartOfDay()
-            )
+            // Borrar TODOS los datos antes de insertar los nuevos
+            database.sleepCycleDao().deleteSleepCyclesBefore(today.plusDays(7).atStartOfDay())
             
             val startTime = today.atTime(23, 0) // 11:00 PM
             val cycles = listOf(
@@ -100,7 +97,7 @@ class SleepViewModel(
             // Verificar que los ciclos se insertaron correctamente
             val insertedCycles = database.sleepCycleDao().getSleepCyclesBetween(
                 today.atStartOfDay(),
-                today.plusDays(1).atStartOfDay()
+                today.plusDays(2).atStartOfDay()
             ).first()
             
             android.util.Log.d("SleepViewModel", "Ciclos insertados en la base de datos:")
