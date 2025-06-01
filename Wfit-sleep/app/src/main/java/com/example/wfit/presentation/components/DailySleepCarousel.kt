@@ -66,9 +66,9 @@ fun DailySleepCarousel(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
+                            .size(36.dp)
                             .background(Color.DarkGray, shape = MaterialTheme.shapes.small)
-                            .padding(12.dp),
+                            .padding(8.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -76,7 +76,7 @@ fun DailySleepCarousel(
                             contentDescription = "Settings",
                             tint = Color.White,
                             modifier = Modifier
-                                .size(24.dp)
+                                .size(20.dp)
                                 .clickable { showSettings = true }
                         )
                     }
@@ -171,9 +171,9 @@ fun DailySleepCarousel(
                 // Settings button
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(36.dp)
                         .background(Color.DarkGray, shape = MaterialTheme.shapes.small)
-                        .padding(12.dp),
+                        .padding(8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -181,7 +181,7 @@ fun DailySleepCarousel(
                         contentDescription = "Settings",
                         tint = Color.White,
                         modifier = Modifier
-                            .size(24.dp)
+                            .size(20.dp)
                             .clickable { showSettings = true }
                     )
                 }
