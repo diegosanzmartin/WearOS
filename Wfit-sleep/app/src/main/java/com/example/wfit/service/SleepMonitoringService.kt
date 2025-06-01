@@ -168,7 +168,12 @@ class SleepMonitoringService : LifecycleService() {
         isMonitoring = false
         sensorManager.stopMonitoring()
         withContext(Dispatchers.Main) {
-            stopForeground(STOP_FOREGROUND_REMOVE)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                stopForeground(Service.STOP_FOREGROUND_REMOVE)
+            } else {
+                @Suppress("DEPRECATION")
+                stopForeground(true)
+            }
             stopSelf()
         }
     }
