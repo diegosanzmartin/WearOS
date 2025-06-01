@@ -1,5 +1,7 @@
 package com.example.wfit.presentation.viewmodel
 
+import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -8,19 +10,35 @@ import com.example.wfit.data.db.entity.SleepCycleEntity
 import com.example.wfit.presentation.model.DailySleepData
 import com.example.wfit.presentation.model.SleepCycle
 import com.example.wfit.presentation.model.SleepPhase
+import com.example.wfit.service.SleepMonitoringService
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
-class SleepViewModel(private val database: SleepDatabase) : ViewModel() {
+class SleepViewModel(
+    private val database: SleepDatabase,
+    private val context: Context
+) : ViewModel() {
     private val _sleepData = MutableStateFlow<List<DailySleepData>>(emptyList())
     val sleepData: StateFlow<List<DailySleepData>> = _sleepData.asStateFlow()
+
+    private val _isTrackingEnabled = MutableStateFlow(true)
+    val isTrackingEnabled: StateFlow<Boolean> = _isTrackingEnabled.asStateFlow()
 
     init {
         loadSleepData()
         cleanOldData()
+    }
+
+    fun toggleTracking() {
+        _isTrackingEnabled.value = !_isTrackingEnabled.value
+        val intent = Intent(context, SleepMonitoringService::class.java).apply {
+            action = SleepMonitoringService.ACTION_SET_TRACKING_STATE
+            putExtra(SleepMonitoringService.EXTRA_TRACKING_STATE, _isTrackingEnabled.value)
+        }
+        context.startForegroundService(intent)
     }
 
     private fun loadSleepData() {
@@ -65,11 +83,14 @@ class SleepViewModel(private val database: SleepDatabase) : ViewModel() {
             .sortedByDescending { it.date }
     }
 
-    class Factory(private val database: SleepDatabase) : ViewModelProvider.Factory {
+    class Factory(
+        private val database: SleepDatabase,
+        private val context: Context
+    ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(SleepViewModel::class.java)) {
-                return SleepViewModel(database) as T
+                return SleepViewModel(database, context) as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
         }

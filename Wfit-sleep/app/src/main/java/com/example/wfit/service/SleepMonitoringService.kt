@@ -33,6 +33,7 @@ class SleepMonitoringService : LifecycleService() {
     private var lastMovementTime: LocalDateTime = LocalDateTime.now()
     private var currentPhase: SleepPhase = SleepPhase.AWAKE
     private var lastPhaseChange: LocalDateTime = LocalDateTime.now()
+    private var isTrackingEnabled = true
 
     override fun onCreate() {
         super.onCreate()
@@ -47,19 +48,27 @@ class SleepMonitoringService : LifecycleService() {
         when (intent?.action) {
             ACTION_START_MONITORING -> startMonitoring()
             ACTION_STOP_MONITORING -> stopMonitoring()
+            ACTION_SET_TRACKING_STATE -> {
+                isTrackingEnabled = intent.getBooleanExtra(EXTRA_TRACKING_STATE, true)
+                if (!isTrackingEnabled) {
+                    stopMonitoring()
+                } else if (!isMonitoring) {
+                    startMonitoring()
+                }
+            }
         }
         
         return START_STICKY
     }
 
     private fun startMonitoring() {
-        if (isMonitoring) return
+        if (isMonitoring || !isTrackingEnabled) return
         
         isMonitoring = true
         startForeground(NOTIFICATION_ID, createNotification())
         
         serviceScope.launch {
-            while (isMonitoring) {
+            while (isMonitoring && isTrackingEnabled) {
                 val now = LocalDateTime.now()
                 val currentTime = now.toLocalTime()
                 
@@ -183,5 +192,7 @@ class SleepMonitoringService : LifecycleService() {
         
         const val ACTION_START_MONITORING = "com.example.wfit.ACTION_START_MONITORING"
         const val ACTION_STOP_MONITORING = "com.example.wfit.ACTION_STOP_MONITORING"
+        const val ACTION_SET_TRACKING_STATE = "com.example.wfit.ACTION_SET_TRACKING_STATE"
+        const val EXTRA_TRACKING_STATE = "tracking_state"
     }
 } 

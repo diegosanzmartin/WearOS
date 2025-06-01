@@ -7,8 +7,8 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.Composable
-import androidx.wear.compose.material.Text
+import androidx.compose.runtime.*
+import androidx.wear.compose.material.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,8 +23,21 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun DailySleepCarousel(
     sleepDataList: List<DailySleepData>,
+    isTrackingEnabled: Boolean,
+    onTrackingToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showSettings by remember { mutableStateOf(false) }
+
+    if (showSettings) {
+        SettingsMenu(
+            isTrackingEnabled = isTrackingEnabled,
+            onTrackingToggle = onTrackingToggle,
+            modifier = modifier
+        )
+        return
+    }
+
     if (sleepDataList.isEmpty()) {
         EmptySleepData(modifier = modifier)
         return
@@ -115,7 +128,23 @@ fun DailySleepCarousel(
                     )
                 }
                 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Settings button
+                Button(
+                    onClick = { showSettings = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Text(
+                        text = "Settings",
+                        fontSize = 14.sp,
+                        color = Color.White
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

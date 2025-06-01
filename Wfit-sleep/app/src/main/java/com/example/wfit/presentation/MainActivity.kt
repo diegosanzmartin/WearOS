@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private val viewModel: SleepViewModel by viewModels {
-        SleepViewModel.Factory(SleepDatabase.getDatabase(this))
+        SleepViewModel.Factory(SleepDatabase.getDatabase(this), this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,8 +63,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             WearApp {
                 val sleepData by viewModel.sleepData.collectAsState()
+                val isTrackingEnabled by viewModel.isTrackingEnabled.collectAsState()
+                
                 DailySleepCarousel(
                     sleepDataList = sleepData,
+                    isTrackingEnabled = isTrackingEnabled,
+                    onTrackingToggle = { viewModel.toggleTracking() },
                     modifier = Modifier.fillMaxSize()
                 )
             }
