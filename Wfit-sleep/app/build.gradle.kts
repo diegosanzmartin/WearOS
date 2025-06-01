@@ -14,7 +14,25 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+    }
 
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "armeabi-v7a")
+            isUniversalApk = false
+        }
+    }
+
+    android.applicationVariants.all {
+        val variant = this
+        variant.outputs
+            .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
+            .forEach { output ->
+                val abi = output.getFilter(com.android.build.OutputFile.ABI)
+                output.outputFileName = "WFitSleep_${variant.versionName}_${abi}.apk"
+            }
     }
 
     buildTypes {
