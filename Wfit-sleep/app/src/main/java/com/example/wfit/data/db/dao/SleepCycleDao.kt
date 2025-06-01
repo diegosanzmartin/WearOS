@@ -13,7 +13,13 @@ interface SleepCycleDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(sleepCycles: List<SleepCycleEntity>)
 
-    @Query("SELECT * FROM sleep_cycles WHERE (startTime >= :startDate AND startTime < :endDate) OR (endTime > :startDate AND endTime <= :endDate) ORDER BY startTime ASC")
+    @Query("""
+        SELECT * FROM sleep_cycles 
+        WHERE (startTime >= :startDate AND startTime < :endDate) 
+           OR (endTime > :startDate AND endTime <= :endDate)
+           OR (startTime < :startDate AND endTime > :endDate)
+        ORDER BY startTime ASC
+    """)
     fun getSleepCyclesBetween(startDate: LocalDateTime, endDate: LocalDateTime): Flow<List<SleepCycleEntity>>
 
     @Query("SELECT * FROM sleep_cycles WHERE startTime >= :date ORDER BY startTime ASC LIMIT 1")

@@ -162,6 +162,11 @@ class SleepViewModel(
             
             // Si el ciclo cruza la medianoche, asignarlo al día de inicio
             groupedCycles.getOrPut(startDate) { mutableListOf() }.add(entity)
+            
+            // Si el ciclo termina en un día diferente, también agregarlo a ese día
+            if (endDate != startDate) {
+                groupedCycles.getOrPut(endDate) { mutableListOf() }.add(entity)
+            }
         }
 
         return groupedCycles.map { (date, cycles) ->
@@ -172,7 +177,7 @@ class SleepViewModel(
             }
 
             DailySleepData(
-                date = cycles.first().startTime,
+                date = date.atStartOfDay(),
                 cycles = cycles.map { entity ->
                     SleepCycle(
                         phase = entity.phase,
