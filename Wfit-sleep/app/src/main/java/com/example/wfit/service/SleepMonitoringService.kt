@@ -66,10 +66,12 @@ class SleepMonitoringService : LifecycleService() {
             }
             ACTION_SET_TRACKING_STATE -> {
                 isTrackingEnabled = intent.getBooleanExtra(EXTRA_TRACKING_STATE, true)
-                serviceScope.launch {
-                    if (!isTrackingEnabled) {
+                if (!isTrackingEnabled) {
+                    serviceScope.launch {
                         stopMonitoring()
-                    } else if (!isMonitoring) {
+                    }
+                } else if (!isMonitoring) {
+                    serviceScope.launch {
                         startMonitoring()
                     }
                 }
@@ -133,12 +135,14 @@ class SleepMonitoringService : LifecycleService() {
     }
 
     private suspend fun saveSleepCycle(phase: SleepPhase, startTime: LocalDateTime, endTime: LocalDateTime) {
-        val sleepCycle = SleepCycleEntity(
-            phase = phase,
-            startTime = startTime,
-            endTime = endTime
-        )
-        database.sleepCycleDao().insert(sleepCycle)
+        withContext(Dispatchers.IO) {
+            val sleepCycle = SleepCycleEntity(
+                phase = phase,
+                startTime = startTime,
+                endTime = endTime
+            )
+            database.sleepCycleDao().insert(sleepCycle)
+        }
     }
 
     private fun determineSleepPhase(): SleepPhase {
@@ -164,7 +168,7 @@ class SleepMonitoringService : LifecycleService() {
         isMonitoring = false
         sensorManager.stopMonitoring()
         withContext(Dispatchers.Main) {
-            stopForeground(true)
+            stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
         }
     }
