@@ -46,31 +46,40 @@ fun DailySleepCarousel(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (sleepDataList.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+            Box(
+                modifier = Modifier.fillMaxSize()
             ) {
-                EmptySleepData()
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    EmptySleepData()
+                }
                 
                 // Settings button
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
-                        .background(Color.DarkGray, shape = MaterialTheme.shapes.small)
-                        .padding(12.dp),
-                    contentAlignment = Alignment.Center
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 16.dp)
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_settings),
-                        contentDescription = "Settings",
-                        tint = Color.White,
+                    Box(
                         modifier = Modifier
-                            .size(24.dp)
-                            .clickable { showSettings = true }
-                    )
+                            .size(48.dp)
+                            .background(Color.DarkGray, shape = MaterialTheme.shapes.small)
+                            .padding(12.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_settings),
+                            contentDescription = "Settings",
+                            tint = Color.White,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clickable { showSettings = true }
+                        )
+                    }
                 }
             }
             return
