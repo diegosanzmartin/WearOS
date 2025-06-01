@@ -24,4 +24,7 @@ interface SleepCycleDao {
 
     @Query("DELETE FROM sleep_cycles WHERE startTime < :date")
     suspend fun deleteSleepCyclesBefore(date: LocalDateTime)
+
+    @Query("DELETE FROM sleep_cycles WHERE startTime >= :startDate AND startTime < :endDate")
+    suspend fun deleteSleepCyclesBetween(startDate: LocalDateTime, endDate: LocalDateTime)
 } 

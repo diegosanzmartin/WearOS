@@ -35,7 +35,10 @@ class SleepViewModel(
         viewModelScope.launch {
             val today = LocalDate.now()
             // Borrar datos de hoy antes de insertar los nuevos
-            database.sleepCycleDao().deleteSleepCyclesBefore(today.plusDays(1).atStartOfDay())
+            database.sleepCycleDao().deleteSleepCyclesBetween(
+                today.atStartOfDay(),
+                today.plusDays(1).atStartOfDay()
+            )
             
             val startTime = today.atTime(23, 0) // 11:00 PM
             val cycles = listOf(
