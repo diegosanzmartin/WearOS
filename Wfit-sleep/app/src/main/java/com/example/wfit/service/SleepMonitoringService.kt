@@ -72,10 +72,11 @@ class SleepMonitoringService : LifecycleService() {
         if (isMonitoring || !isTrackingEnabled) return
         
         isMonitoring = true
-        sensorManager.startMonitoring()
         startForeground(NOTIFICATION_ID, createNotification())
         
         serviceScope.launch {
+            sensorManager.startMonitoring()
+            
             while (isMonitoring && isTrackingEnabled) {
                 val now = LocalDateTime.now()
                 val currentTime = now.toLocalTime()
@@ -95,25 +96,6 @@ class SleepMonitoringService : LifecycleService() {
                 }
                 
                 delay(MONITORING_INTERVAL)
-            }
-        }
-        
-        // Monitorear los sensores
-        serviceScope.launch {
-            sensorManager.movementDetected.collect { movement ->
-                if (movement) {
-                    movementCounter++
-                    lastMovementTime = LocalDateTime.now()
-                }
-            }
-        }
-        
-        serviceScope.launch {
-            sensorManager.heartRate.collect { rate ->
-                if (rate > 0) {
-                    heartRateSum += rate
-                    heartRateReadings++
-                }
             }
         }
     }
@@ -149,18 +131,18 @@ class SleepMonitoringService : LifecycleService() {
     }
 
     private fun determineSleepPhase(now: LocalDateTime): SleepPhase {
-        val minutesSinceLastMovement = java.time.Duration.between(lastMovementTime, now).toMinutes()
-        val averageHeartRate = if (heartRateReadings > 0) heartRateSum / heartRateReadings else 0f
+        val minutesSinceLastMovement = sensorManager.getTimeSinceLastMovement().toMinutes()
+        val currentHeartRate = sensorManager.heartRate.value
         
         return when {
             // Alta actividad y ritmo cardíaco elevado = Despierto
-            minutesSinceLastMovement < 5 && movementCounter > 10 -> SleepPhase.AWAKE
+            minutesSinceLastMovement < 5 && currentHeartRate > 70 -> SleepPhase.AWAKE
             
             // Poco movimiento y ritmo cardíaco estable = Sueño ligero
-            minutesSinceLastMovement < 20 && averageHeartRate > 50 -> SleepPhase.LIGHT_SLEEP
+            minutesSinceLastMovement < 20 && currentHeartRate in 50..70 -> SleepPhase.LIGHT_SLEEP
             
             // Muy poco movimiento y ritmo cardíaco bajo = Sueño profundo
-            minutesSinceLastMovement < 40 && averageHeartRate < 50 -> SleepPhase.DEEP_SLEEP
+            minutesSinceLastMovement < 40 && currentHeartRate < 50 -> SleepPhase.DEEP_SLEEP
             
             // Algo de movimiento y variación en ritmo cardíaco = REM
             else -> SleepPhase.REM
@@ -169,7 +151,9 @@ class SleepMonitoringService : LifecycleService() {
 
     private fun stopMonitoring() {
         isMonitoring = false
-        sensorManager.stopMonitoring()
+        serviceScope.launch {
+            sensorManager.stopMonitoring()
+        }
         stopForeground(true)
         stopSelf()
     }

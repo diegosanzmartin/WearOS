@@ -1,18 +1,21 @@
 package com.example.wfit.service
 
 import android.content.Context
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
+import android.util.Log
+import androidx.health.services.client.HealthServices
+import androidx.health.services.client.HealthServicesClient
+import androidx.health.services.client.data.DataType
+import androidx.health.services.client.data.SleepStage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlin.math.abs
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import java.time.Duration
+import java.time.Instant
 
-class SleepSensorManager(context: Context) : SensorEventListener {
-    private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-    private val heartRateSensor = sensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE)
-    private val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+class SleepSensorManager(context: Context) {
+    private val healthClient = HealthServices.getClient(context)
+    private val dataClient = healthClient.dataClient
     
     private val _movementDetected = MutableStateFlow(false)
     val movementDetected: StateFlow<Boolean> = _movementDetected
@@ -20,50 +23,56 @@ class SleepSensorManager(context: Context) : SensorEventListener {
     private val _heartRate = MutableStateFlow(0f)
     val heartRate: StateFlow<Float> = _heartRate
     
-    private var lastAcceleration = floatArrayOf(0f, 0f, 0f)
-    private val movementThreshold = 0.8f // Ajustable según sensibilidad deseada
+    private var lastMovementTime = Instant.now()
+    private val movementThreshold = 0.8f
     
-    fun startMonitoring() {
-        sensorManager.registerListener(
-            this,
-            accelerometer,
-            SensorManager.SENSOR_DELAY_NORMAL
-        )
-        sensorManager.registerListener(
-            this,
-            heartRateSensor,
-            SensorManager.SENSOR_DELAY_NORMAL
-        )
-    }
-    
-    fun stopMonitoring() {
-        sensorManager.unregisterListener(this)
-    }
-    
-    override fun onSensorChanged(event: SensorEvent) {
-        when (event.sensor.type) {
-            Sensor.TYPE_ACCELEROMETER -> processAccelerometerData(event.values)
-            Sensor.TYPE_HEART_RATE -> processHeartRateData(event.values[0])
+    suspend fun startMonitoring() {
+        try {
+            // Registrar para datos de ritmo cardíaco
+            val heartRateFlow = dataClient.register(DataType.HEART_RATE_BPM)
+            
+            // Registrar para datos de movimiento
+            val motionFlow = dataClient.register(DataType.SLEEP_SEGMENT)
+            
+            // Procesar datos de ritmo cardíaco
+            heartRateFlow.collect { record ->
+                _heartRate.value = record.value
+            }
+            
+            // Procesar datos de movimiento/sueño
+            motionFlow.collect { record ->
+                when (record.value) {
+                    SleepStage.SLEEPING -> {
+                        _movementDetected.value = false
+                        lastMovementTime = Instant.now()
+                    }
+                    SleepStage.AWAKE -> {
+                        _movementDetected.value = true
+                        lastMovementTime = Instant.now()
+                    }
+                    else -> {
+                        // Mantener el estado actual
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error starting sleep monitoring", e)
         }
     }
     
-    private fun processAccelerometerData(values: FloatArray) {
-        val deltaX = abs(values[0] - lastAcceleration[0])
-        val deltaY = abs(values[1] - lastAcceleration[1])
-        val deltaZ = abs(values[2] - lastAcceleration[2])
-        
-        lastAcceleration = values.clone()
-        
-        // Detecta movimiento significativo
-        val movement = (deltaX + deltaY + deltaZ) > movementThreshold
-        _movementDetected.value = movement
+    suspend fun stopMonitoring() {
+        try {
+            dataClient.clearAll()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error stopping sleep monitoring", e)
+        }
     }
     
-    private fun processHeartRateData(heartRate: Float) {
-        _heartRate.value = heartRate
+    fun getTimeSinceLastMovement(): Duration {
+        return Duration.between(lastMovementTime, Instant.now())
     }
     
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-        // No necesitamos implementar esto por ahora
+    companion object {
+        private const val TAG = "SleepSensorManager"
     }
 } 

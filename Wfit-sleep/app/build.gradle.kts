@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.example.wfit"
-    compileSdk = 35
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.wfit"
         minSdk = 30
-        targetSdk = 35
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
         vectorDrawables {
@@ -115,6 +115,8 @@ dependencies {
     debugImplementation(libs.ui.test.manifest)
     debugImplementation(libs.tiles.tooling)
 
-    // Sensors
-    implementation("androidx.wear:wear-sensors:1.0.0")
+    // Wear OS and Sensors
+    implementation("androidx.wear:wear:1.3.0")
+    implementation("com.google.android.gms:play-services-wearable:18.1.0")
+    implementation("androidx.health:health-services-client:1.0.0-beta03")
 }
