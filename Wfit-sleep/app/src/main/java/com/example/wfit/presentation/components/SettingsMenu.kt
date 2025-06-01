@@ -2,6 +2,7 @@ package com.example.wfit.presentation.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -10,8 +11,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.wear.compose.material.*
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 @Composable
 fun SettingsMenu(
@@ -19,6 +22,19 @@ fun SettingsMenu(
     onTrackingToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showSleepCycleSettings by remember { mutableStateOf(false) }
+
+    if (showSleepCycleSettings) {
+        SleepCycleScreen(
+            onConfirm = { startTime, endTime ->
+                // Handle the confirmed time range, e.g., save to ViewModel or SharedPreferences
+                println("Sleep cycle confirmed: $startTime to $endTime") // Placeholder action
+                showSleepCycleSettings = false
+            }
+        )
+        return
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -49,6 +65,31 @@ fun SettingsMenu(
             Switch(
                 checked = isTrackingEnabled,
                 onCheckedChange = { onTrackingToggle() }
+            )
+        }
+
+        // Divider
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(Color.Gray.copy(alpha = 0.3f))
+                .padding(vertical = 8.dp)
+        )
+
+        // Sleep Cycle setting
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+                .clickable { showSleepCycleSettings = true },
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Sleep Cycle",
+                fontSize = 16.sp,
+                color = Color.White
             )
         }
 

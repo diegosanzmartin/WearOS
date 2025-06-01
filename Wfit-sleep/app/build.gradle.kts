@@ -74,6 +74,7 @@ dependencies {
     implementation(libs.horologist.compose.tools)
     implementation(libs.horologist.tiles)
     implementation(libs.watchface.complications.data.source.ktx)
+    implementation(libs.compose.icons.extended)
     
     // Room
     implementation("androidx.room:room-runtime:2.6.1")
