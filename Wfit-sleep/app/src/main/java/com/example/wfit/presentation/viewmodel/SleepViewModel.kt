@@ -111,6 +111,11 @@ class SleepViewModel(
             .map { entities ->
                 // Ordenar los ciclos por tiempo de inicio
                 val sortedEntities = entities.sortedBy { it.startTime }
+                // Log para verificar los ciclos obtenidos
+                android.util.Log.d("SleepViewModel", "Ciclos obtenidos de la base de datos:")
+                sortedEntities.forEach { entity ->
+                    android.util.Log.d("SleepViewModel", "Ciclo: ${entity.phase} de ${entity.startTime} a ${entity.endTime} (${entity.durationMinutes} minutos)")
+                }
                 groupSleepCyclesByDate(sortedEntities)
             }
             .onEach { dailyData ->
@@ -142,7 +147,7 @@ class SleepViewModel(
         }
 
         return groupedCycles.map { (date, cycles) ->
-            // Log para verificar los ciclos
+            // Log para verificar los ciclos agrupados
             android.util.Log.d("SleepViewModel", "Procesando ciclos para el día $date:")
             cycles.forEach { cycle ->
                 android.util.Log.d("SleepViewModel", "Ciclo: ${cycle.phase} de ${cycle.startTime} a ${cycle.endTime} (${cycle.durationMinutes} minutos)")
