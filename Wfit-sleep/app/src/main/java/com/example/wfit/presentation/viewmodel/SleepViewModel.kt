@@ -122,7 +122,7 @@ class SleepViewModel(
     private fun loadSleepData() {
         val today = LocalDate.now()
         val startDate = today.minusDays(2).atStartOfDay()
-        val endDate = today.plusDays(1).atStartOfDay()
+        val endDate = today.plusDays(2).atStartOfDay() // Aumentamos el rango para asegurar que obtenemos todos los ciclos
 
         database.sleepCycleDao()
             .getSleepCyclesBetween(startDate, endDate)
@@ -153,20 +153,12 @@ class SleepViewModel(
     private fun groupSleepCyclesByDate(entities: List<SleepCycleEntity>): List<DailySleepData> {
         if (entities.isEmpty()) return emptyList()
 
-        // Agrupar los ciclos por día, considerando que un ciclo de sueño puede cruzar la medianoche
+        // Agrupar los ciclos por día
         val groupedCycles = mutableMapOf<LocalDate, MutableList<SleepCycleEntity>>()
         
         entities.forEach { entity ->
             val startDate = entity.startTime.toLocalDate()
-            val endDate = entity.endTime.toLocalDate()
-            
-            // Si el ciclo cruza la medianoche, asignarlo al día de inicio
             groupedCycles.getOrPut(startDate) { mutableListOf() }.add(entity)
-            
-            // Si el ciclo termina en un día diferente, también agregarlo a ese día
-            if (endDate != startDate) {
-                groupedCycles.getOrPut(endDate) { mutableListOf() }.add(entity)
-            }
         }
 
         return groupedCycles.map { (date, cycles) ->
