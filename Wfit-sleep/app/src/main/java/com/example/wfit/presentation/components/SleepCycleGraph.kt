@@ -8,7 +8,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.dp
+import android.graphics.Paint
+import android.graphics.Typeface
 import com.example.wfit.presentation.model.DailySleepData
 import com.example.wfit.presentation.model.SleepPhase
 import java.time.format.DateTimeFormatter
@@ -22,19 +27,35 @@ fun SleepCycleGraph(
     Canvas(
         modifier = modifier
             .fillMaxWidth()
-            .height(120.dp)
+            .height(140.dp) // Aumentado para dar espacio a las etiquetas
             .padding(8.dp)
     ) {
         val width = size.width
-        val height = size.height
-        val path = Path()
+        val height = size.height - 20f // Reservar espacio para las etiquetas
 
-        // Colores para cada fase del sueño
+        // Configurar el Paint para las etiquetas de tiempo
+        val textPaint = Paint().apply {
+            color = android.graphics.Color.WHITE
+            alpha = 180
+            textSize = 35f
+            typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            isAntiAlias = true
+        }
+
+        // Colores para cada fase del sueño con efecto retro
         val phaseColors = mapOf(
-            SleepPhase.AWAKE to Color(0xFFE57373),      // Rojo claro
-            SleepPhase.LIGHT_SLEEP to Color(0xFF81C784), // Verde claro
-            SleepPhase.DEEP_SLEEP to Color(0xFF5C6BC0),  // Azul medio
-            SleepPhase.REM to Color(0xFF9575CD)          // Morado
+            SleepPhase.AWAKE to Color(0xFFFF6B6B).copy(alpha = 0.4f),      // Rojo neón
+            SleepPhase.LIGHT_SLEEP to Color(0xFF4ECDC4).copy(alpha = 0.4f), // Turquesa retro
+            SleepPhase.DEEP_SLEEP to Color(0xFF45B7D1).copy(alpha = 0.4f),  // Azul retro
+            SleepPhase.REM to Color(0xFFBA68C8).copy(alpha = 0.4f)          // Morado retro
+        )
+
+        // Colores para los bordes con efecto neón
+        val strokeColors = mapOf(
+            SleepPhase.AWAKE to Color(0xFFFF6B6B).copy(alpha = 0.8f),
+            SleepPhase.LIGHT_SLEEP to Color(0xFF4ECDC4).copy(alpha = 0.8f),
+            SleepPhase.DEEP_SLEEP to Color(0xFF45B7D1).copy(alpha = 0.8f),
+            SleepPhase.REM to Color(0xFFBA68C8).copy(alpha = 0.8f)
         )
 
         // Calcular el tiempo total en minutos
@@ -42,6 +63,18 @@ fun SleepCycleGraph(
             sleepData.cycles.first().startTime,
             sleepData.cycles.last().endTime
         )
+
+        // Dibujar grid retro (líneas de fondo)
+        val gridLines = 4
+        for (i in 0..gridLines) {
+            val y = height * i / gridLines
+            drawLine(
+                color = Color.White.copy(alpha = 0.1f),
+                start = Offset(0f, y),
+                end = Offset(width, y),
+                strokeWidth = 1f
+            )
+        }
 
         var currentX = 0f
         sleepData.cycles.forEach { cycle ->
@@ -53,29 +86,74 @@ fun SleepCycleGraph(
                 SleepPhase.REM -> height * 0.6f
             }
 
-            if (currentX == 0f) {
-                path.moveTo(currentX, y)
-            } else {
-                path.lineTo(currentX, y)
+            // Crear un path para el área de cada fase
+            val phasePath = Path().apply {
+                moveTo(currentX, height)
+                lineTo(currentX, y)
+                lineTo(currentX + cycleWidth, y)
+                lineTo(currentX + cycleWidth, height)
+                close()
             }
 
-            currentX += cycleWidth
-            path.lineTo(currentX, y)
-
-            // Dibujar la línea con el color correspondiente a la fase
-            drawLine(
-                color = phaseColors[cycle.phase] ?: Color.Gray,
-                start = Offset(currentX - cycleWidth, y),
-                end = Offset(currentX, y),
-                strokeWidth = 3f
+            // Dibujar el área rellena con efecto retro
+            drawPath(
+                path = phasePath,
+                color = phaseColors[cycle.phase] ?: Color.Gray
             )
+
+            // Dibujar el borde con efecto neón
+            drawPath(
+                path = phasePath,
+                color = strokeColors[cycle.phase] ?: Color.White,
+                style = Stroke(
+                    width = 3f,
+                    cap = StrokeCap.Round
+                )
+            )
+
+            // Dibujar línea horizontal más gruesa para cada fase
+            drawLine(
+                color = strokeColors[cycle.phase] ?: Color.White,
+                start = Offset(currentX, y),
+                end = Offset(currentX + cycleWidth, y),
+                strokeWidth = 4f,
+                cap = StrokeCap.Round
+            )
+
+            currentX += cycleWidth
         }
 
-        // Dibujar el path completo
-        drawPath(
-            path = path,
-            color = Color.Gray,
-            style = Stroke(width = 2f)
+        // Dibujar línea base con efecto neón
+        drawLine(
+            color = Color.White.copy(alpha = 0.8f),
+            start = Offset(0f, height),
+            end = Offset(width, height),
+            strokeWidth = 4f,
+            cap = StrokeCap.Round
         )
+
+        // Formatear y dibujar las etiquetas de tiempo
+        val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+        val startTime = sleepData.cycles.first().startTime.format(timeFormatter)
+        val endTime = sleepData.cycles.last().endTime.format(timeFormatter)
+
+        drawIntoCanvas { canvas ->
+            // Dibujar hora de inicio
+            canvas.nativeCanvas.drawText(
+                startTime,
+                0f,
+                height + 35f, // Posición Y debajo del gráfico
+                textPaint
+            )
+
+            // Dibujar hora de fin
+            val endTimeWidth = textPaint.measureText(endTime)
+            canvas.nativeCanvas.drawText(
+                endTime,
+                width - endTimeWidth,
+                height + 35f, // Posición Y debajo del gráfico
+                textPaint
+            )
+        }
     }
 } 
