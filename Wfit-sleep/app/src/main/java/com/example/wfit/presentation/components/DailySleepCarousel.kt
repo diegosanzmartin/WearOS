@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.wfit.presentation.model.DailySleepData
+import com.example.wfit.presentation.model.SleepPhase
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -45,49 +46,70 @@ fun DailySleepCarousel(
             ) {
                 DailySleepCard(dailyData)
                 
-                // Información adicional que se puede scrollear
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Detalles de las fases
+                Text(
+                    text = "Sleep stage",
+                    fontSize = 16.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+                
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                 ) {
-                    Text(
-                        text = "Detalles del sueño",
-                        fontSize = 16.sp,
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp)
+                    val totalTime = dailyData.totalSleepTime
+                    
+                    // Deep Sleep
+                    val deepSleepTime = dailyData.cycles
+                        .filter { it.phase == SleepPhase.DEEP_SLEEP }
+                        .sumOf { it.durationMinutes }
+                    PhaseTimeDetail(
+                        phase = "Profundo",
+                        minutes = deepSleepTime,
+                        totalMinutes = totalTime,
+                        modifier = Modifier.fillMaxWidth()
                     )
                     
-                    // Tiempo en cada fase
-                    PhaseTimeDetail("Sueño profundo", 
-                        dailyData.cycles
-                            .filter { it.phase == com.example.wfit.presentation.model.SleepPhase.DEEP_SLEEP }
-                            .sumOf { it.durationMinutes }
+                    // Light Sleep
+                    val lightSleepTime = dailyData.cycles
+                        .filter { it.phase == SleepPhase.LIGHT_SLEEP }
+                        .sumOf { it.durationMinutes }
+                    PhaseTimeDetail(
+                        phase = "Ligero",
+                        minutes = lightSleepTime,
+                        totalMinutes = totalTime,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    PhaseTimeDetail("Sueño ligero", 
-                        dailyData.cycles
-                            .filter { it.phase == com.example.wfit.presentation.model.SleepPhase.LIGHT_SLEEP }
-                            .sumOf { it.durationMinutes }
+                    
+                    // REM
+                    val remTime = dailyData.cycles
+                        .filter { it.phase == SleepPhase.REM }
+                        .sumOf { it.durationMinutes }
+                    PhaseTimeDetail(
+                        phase = "REM",
+                        minutes = remTime,
+                        totalMinutes = totalTime,
+                        modifier = Modifier.fillMaxWidth()
                     )
-                    PhaseTimeDetail("REM", 
-                        dailyData.cycles
-                            .filter { it.phase == com.example.wfit.presentation.model.SleepPhase.REM }
-                            .sumOf { it.durationMinutes }
-                    )
-                    PhaseTimeDetail("Despierto", 
-                        dailyData.cycles
-                            .filter { it.phase == com.example.wfit.presentation.model.SleepPhase.AWAKE }
-                            .sumOf { it.durationMinutes }
+                    
+                    // Awake
+                    val awakeTime = dailyData.cycles
+                        .filter { it.phase == SleepPhase.AWAKE }
+                        .sumOf { it.durationMinutes }
+                    PhaseTimeDetail(
+                        phase = "Despierto",
+                        minutes = awakeTime,
+                        totalMinutes = totalTime,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
                 
-                // Espacio adicional al final para asegurar que todo es scrolleable
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }
@@ -139,24 +161,72 @@ private fun DailySleepCard(
 private fun PhaseTimeDetail(
     phase: String,
     minutes: Int,
+    totalMinutes: Int,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    val phaseColors = mapOf(
+        "Profundo" to Color(0xFF3F51B5), // Azul oscuro
+        "Ligero" to Color(0xFF2196F3),   // Azul claro
+        "REM" to Color(0xFF4CAF50),            // Verde
+        "Despierto" to Color(0xFFFF9800)       // Naranja
+    )
+
+    val percentage = (minutes.toFloat() / totalMinutes.toFloat() * 100).toInt()
+    val hours = minutes / 60
+    val remainingMinutes = minutes % 60
+    val timeText = if (hours > 0) {
+        "${hours}h ${remainingMinutes}m"
+    } else {
+        "${remainingMinutes}m"
+    }
+
+    Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(vertical = 4.dp)
     ) {
-        Text(
-            text = phase,
-            fontSize = 14.sp,
-            color = Color.White.copy(alpha = 0.8f)
-        )
-        Text(
-            text = "${minutes}min",
-            fontSize = 14.sp,
-            color = Color.White.copy(alpha = 0.8f)
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = phase,
+                    fontSize = 14.sp,
+                    color = phaseColors[phase] ?: Color.White
+                )
+                Text(
+                    text = " ${percentage}%",
+                    fontSize = 11.sp,
+                    color = Color.White.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+            }
+            Text(
+                text = timeText,
+                fontSize = 11.sp,
+                color = Color.White.copy(alpha = 0.7f)
+            )
+        }
+        
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+                .background(Color(0xFF424242))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(percentage / 100f)
+                    .height(8.dp)
+                    .background(phaseColors[phase] ?: Color.White)
+            )
+        }
     }
 }
 
