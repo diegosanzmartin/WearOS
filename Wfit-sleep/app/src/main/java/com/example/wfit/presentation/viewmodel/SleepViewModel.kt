@@ -88,7 +88,25 @@ class SleepViewModel(
                     endTime = startTime.plusMinutes(420)
                 )
             )
+            
+            // Log para verificar los ciclos antes de insertarlos
+            android.util.Log.d("SleepViewModel", "Intentando insertar ciclos de prueba:")
+            cycles.forEach { cycle ->
+                android.util.Log.d("SleepViewModel", "Ciclo a insertar: ${cycle.phase} de ${cycle.startTime} a ${cycle.endTime} (${cycle.durationMinutes} minutos)")
+            }
+            
             database.sleepCycleDao().insertAll(cycles)
+            
+            // Verificar que los ciclos se insertaron correctamente
+            val insertedCycles = database.sleepCycleDao().getSleepCyclesBetween(
+                today.atStartOfDay(),
+                today.plusDays(1).atStartOfDay()
+            ).first()
+            
+            android.util.Log.d("SleepViewModel", "Ciclos insertados en la base de datos:")
+            insertedCycles.forEach { cycle ->
+                android.util.Log.d("SleepViewModel", "Ciclo insertado: ${cycle.phase} de ${cycle.startTime} a ${cycle.endTime} (${cycle.durationMinutes} minutos)")
+            }
         }
     }
 
