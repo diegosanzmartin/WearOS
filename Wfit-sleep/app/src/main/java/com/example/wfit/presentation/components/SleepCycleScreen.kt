@@ -1,5 +1,7 @@
 package com.example.wfit.presentation.components
 
+import android.graphics.Paint
+import android.graphics.Typeface
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.*
@@ -13,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -76,7 +79,7 @@ fun SleepCycleScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "${selectedDurationHours}h 0m", // Assuming whole hours for now
+                    text = "${selectedDurationHours}h 0m",
                     style = MaterialTheme.typography.title1.copy(fontSize = 24.sp),
                     textAlign = TextAlign.Center
                 )
@@ -98,7 +101,7 @@ fun SleepCycleScreen(
                 Icon(
                     imageVector = Icons.Filled.Check,
                     contentDescription = "Confirm",
-                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
@@ -245,18 +248,19 @@ private fun CircularSlider(
         )
 
         // Draw hour markers
-        val textPaint = androidx.compose.ui.graphics.Paint().asFrameworkPaint().apply {
+        val textPaint = Paint().apply {
             isAntiAlias = true
             textSize = 12.sp.toPx()
             color = android.graphics.Color.LTGRAY
-            textAlign = android.graphics.Paint.Align.CENTER
+            textAlign = Paint.Align.CENTER
         }
+        
         for (hour in 0 until 24) {
             val angleRad = Math.toRadians((hour.toFloat() / 24f * 360f - 90f).toDouble())
-            val markerRadius = radius + strokeWidth * 0.8f // Position outside the arc
+            val markerRadius = radius + strokeWidth * 0.8f
             val x = center.x + markerRadius * cos(angleRad).toFloat()
             val y = center.y + markerRadius * sin(angleRad).toFloat()
-            val textY = y + textPaint.textSize / 3 // Adjust for text centering
+            val textY = y + textPaint.textSize / 3
 
             // Draw a small tick
             val tickStartRadius = radius + strokeWidth /2
@@ -275,9 +279,9 @@ private fun CircularSlider(
 
             // Draw hour text for 0, 6, 12, 18
             if (hour % 6 == 0) {
-                 val textRadius = radius + strokeWidth * 1.5f
-                 val textX = center.x + textRadius * cos(angleRad).toFloat()
-                 val textTextY = center.y + textRadius * sin(angleRad).toFloat() + textPaint.textSize / 3
+                val textRadius = radius + strokeWidth * 1.5f
+                val textX = center.x + textRadius * cos(angleRad).toFloat()
+                val textTextY = center.y + textRadius * sin(angleRad).toFloat() + textPaint.textSize / 3
                 drawContext.canvas.nativeCanvas.drawText(
                     hour.toString(),
                     textX,
