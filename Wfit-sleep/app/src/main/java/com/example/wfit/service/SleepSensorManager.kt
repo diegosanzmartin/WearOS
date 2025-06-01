@@ -3,19 +3,19 @@ package com.example.wfit.service
 import android.content.Context
 import android.util.Log
 import androidx.health.services.client.HealthServices
-import androidx.health.services.client.HealthServicesClient
+import androidx.health.services.client.data.DataPointContainer
 import androidx.health.services.client.data.DataType
-import androidx.health.services.client.data.SleepStage
+import androidx.health.services.client.data.HeartRateAccuracy
+import androidx.health.services.client.data.HeartRateRecord
+import androidx.health.services.client.data.SleepSessionRecord
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import java.time.Duration
 import java.time.Instant
 
 class SleepSensorManager(context: Context) {
     private val healthClient = HealthServices.getClient(context)
-    private val dataClient = healthClient.dataClient
+    private val measureClient = healthClient.measureClient
     
     private val _movementDetected = MutableStateFlow(false)
     val movementDetected: StateFlow<Boolean> = _movementDetected
@@ -29,24 +29,37 @@ class SleepSensorManager(context: Context) {
     suspend fun startMonitoring() {
         try {
             // Registrar para datos de ritmo cardíaco
-            val heartRateFlow = dataClient.register(DataType.HEART_RATE_BPM)
-            
-            // Registrar para datos de movimiento
-            val motionFlow = dataClient.register(DataType.SLEEP_SEGMENT)
-            
-            // Procesar datos de ritmo cardíaco
-            heartRateFlow.collect { record ->
-                _heartRate.value = record.value
+            measureClient.registerCallback(DataType.HEART_RATE_BPM) { data ->
+                processHeartRateData(data)
             }
             
-            // Procesar datos de movimiento/sueño
-            motionFlow.collect { record ->
-                when (record.value) {
-                    SleepStage.SLEEPING -> {
+            // Registrar para datos de sueño
+            measureClient.registerCallback(DataType.SLEEP_SESSION_RECORD) { data ->
+                processSleepData(data)
+            }
+            
+        } catch (e: Exception) {
+            Log.e(TAG, "Error starting sleep monitoring", e)
+        }
+    }
+    
+    private fun processHeartRateData(data: DataPointContainer) {
+        data.getData(DataType.HEART_RATE_BPM).firstOrNull()?.let { record ->
+            if (record is HeartRateRecord && record.accuracy != HeartRateAccuracy.NO_CONTACT) {
+                _heartRate.value = record.bpm.toFloat()
+            }
+        }
+    }
+    
+    private fun processSleepData(data: DataPointContainer) {
+        data.getData(DataType.SLEEP_SESSION_RECORD).firstOrNull()?.let { record ->
+            if (record is SleepSessionRecord) {
+                when (record.stage) {
+                    SleepSessionRecord.Stage.SLEEPING -> {
                         _movementDetected.value = false
                         lastMovementTime = Instant.now()
                     }
-                    SleepStage.AWAKE -> {
+                    SleepSessionRecord.Stage.AWAKE -> {
                         _movementDetected.value = true
                         lastMovementTime = Instant.now()
                     }
@@ -55,14 +68,12 @@ class SleepSensorManager(context: Context) {
                     }
                 }
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error starting sleep monitoring", e)
         }
     }
     
     suspend fun stopMonitoring() {
         try {
-            dataClient.clearAll()
+            measureClient.unregisterAllCallbacks()
         } catch (e: Exception) {
             Log.e(TAG, "Error stopping sleep monitoring", e)
         }

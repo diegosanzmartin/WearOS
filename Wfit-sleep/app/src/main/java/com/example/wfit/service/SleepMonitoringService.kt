@@ -21,6 +21,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.time.LocalTime
 import kotlin.math.abs
@@ -53,14 +54,24 @@ class SleepMonitoringService : LifecycleService() {
         super.onStartCommand(intent, flags, startId)
         
         when (intent?.action) {
-            ACTION_START_MONITORING -> startMonitoring()
-            ACTION_STOP_MONITORING -> stopMonitoring()
+            ACTION_START_MONITORING -> {
+                serviceScope.launch {
+                    startMonitoring()
+                }
+            }
+            ACTION_STOP_MONITORING -> {
+                serviceScope.launch {
+                    stopMonitoring()
+                }
+            }
             ACTION_SET_TRACKING_STATE -> {
                 isTrackingEnabled = intent.getBooleanExtra(EXTRA_TRACKING_STATE, true)
-                if (!isTrackingEnabled) {
-                    stopMonitoring()
-                } else if (!isMonitoring) {
-                    startMonitoring()
+                serviceScope.launch {
+                    if (!isTrackingEnabled) {
+                        stopMonitoring()
+                    } else if (!isMonitoring) {
+                        startMonitoring()
+                    }
                 }
             }
         }
@@ -68,35 +79,35 @@ class SleepMonitoringService : LifecycleService() {
         return START_STICKY
     }
 
-    private fun startMonitoring() {
+    private suspend fun startMonitoring() {
         if (isMonitoring || !isTrackingEnabled) return
         
         isMonitoring = true
-        startForeground(NOTIFICATION_ID, createNotification())
+        withContext(Dispatchers.Main) {
+            startForeground(NOTIFICATION_ID, createNotification())
+        }
         
-        serviceScope.launch {
-            sensorManager.startMonitoring()
+        sensorManager.startMonitoring()
+        
+        while (isMonitoring && isTrackingEnabled) {
+            val now = LocalDateTime.now()
+            val currentTime = now.toLocalTime()
             
-            while (isMonitoring && isTrackingEnabled) {
-                val now = LocalDateTime.now()
-                val currentTime = now.toLocalTime()
-                
-                // Check if we should stop monitoring (early wake-up)
-                if (currentTime.isBefore(LocalTime.of(12, 0)) && 
-                    currentTime.isAfter(LocalTime.of(7, 0)) && 
-                    currentPhase == SleepPhase.AWAKE) {
-                    stopMonitoring()
-                    break
-                }
-                
-                // Check if we should start monitoring (sleep time)
-                if (currentTime.isAfter(LocalTime.of(23, 0)) || 
-                    currentTime.isBefore(LocalTime.of(12, 0))) {
-                    monitorSleepCycle()
-                }
-                
-                delay(MONITORING_INTERVAL)
+            // Check if we should stop monitoring (early wake-up)
+            if (currentTime.isBefore(LocalTime.of(12, 0)) && 
+                currentTime.isAfter(LocalTime.of(7, 0)) && 
+                currentPhase == SleepPhase.AWAKE) {
+                stopMonitoring()
+                break
             }
+            
+            // Check if we should start monitoring (sleep time)
+            if (currentTime.isAfter(LocalTime.of(23, 0)) || 
+                currentTime.isBefore(LocalTime.of(12, 0))) {
+                monitorSleepCycle()
+            }
+            
+            delay(MONITORING_INTERVAL)
         }
     }
 
@@ -104,7 +115,7 @@ class SleepMonitoringService : LifecycleService() {
         val now = LocalDateTime.now()
         
         // Determinar fase del sueño basado en sensores
-        val newPhase = determineSleepPhase(now)
+        val newPhase = determineSleepPhase()
         
         if (newPhase != currentPhase) {
             // Guardar la fase anterior
@@ -130,7 +141,7 @@ class SleepMonitoringService : LifecycleService() {
         database.sleepCycleDao().insert(sleepCycle)
     }
 
-    private fun determineSleepPhase(now: LocalDateTime): SleepPhase {
+    private fun determineSleepPhase(): SleepPhase {
         val minutesSinceLastMovement = sensorManager.getTimeSinceLastMovement().toMinutes()
         val currentHeartRate = sensorManager.heartRate.value
         
@@ -149,13 +160,13 @@ class SleepMonitoringService : LifecycleService() {
         }
     }
 
-    private fun stopMonitoring() {
+    private suspend fun stopMonitoring() {
         isMonitoring = false
-        serviceScope.launch {
-            sensorManager.stopMonitoring()
+        sensorManager.stopMonitoring()
+        withContext(Dispatchers.Main) {
+            stopForeground(true)
+            stopSelf()
         }
-        stopForeground(true)
-        stopSelf()
     }
 
     private fun createNotificationChannel() {
@@ -195,7 +206,9 @@ class SleepMonitoringService : LifecycleService() {
         if (wakeLock.isHeld) {
             wakeLock.release()
         }
-        sensorManager.stopMonitoring()
+        serviceScope.launch {
+            sensorManager.stopMonitoring()
+        }
     }
 
     companion object {
