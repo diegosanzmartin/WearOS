@@ -103,7 +103,9 @@ class SleepViewModel(
         database.sleepCycleDao()
             .getSleepCyclesBetween(startDate, endDate)
             .map { entities ->
-                groupSleepCyclesByDate(entities)
+                // Ordenar los ciclos por tiempo de inicio
+                val sortedEntities = entities.sortedBy { it.startTime }
+                groupSleepCyclesByDate(sortedEntities)
             }
             .onEach { dailyData ->
                 _sleepData.value = dailyData
@@ -120,21 +122,31 @@ class SleepViewModel(
     }
 
     private fun groupSleepCyclesByDate(entities: List<SleepCycleEntity>): List<DailySleepData> {
-        return entities
-            .groupBy { it.startTime.toLocalDate() }
-            .map { (date, cycles) ->
-                DailySleepData(
-                    date = cycles.first().startTime,
-                    cycles = cycles.map { entity ->
-                        SleepCycle(
-                            phase = entity.phase,
-                            startTime = entity.startTime,
-                            endTime = entity.endTime
-                        )
-                    }
-                )
-            }
-            .sortedByDescending { it.date }
+        if (entities.isEmpty()) return emptyList()
+
+        // Agrupar los ciclos por día, considerando que un ciclo de sueño puede cruzar la medianoche
+        val groupedCycles = mutableMapOf<LocalDate, MutableList<SleepCycleEntity>>()
+        
+        entities.forEach { entity ->
+            val startDate = entity.startTime.toLocalDate()
+            val endDate = entity.endTime.toLocalDate()
+            
+            // Si el ciclo cruza la medianoche, asignarlo al día de inicio
+            groupedCycles.getOrPut(startDate) { mutableListOf() }.add(entity)
+        }
+
+        return groupedCycles.map { (date, cycles) ->
+            DailySleepData(
+                date = cycles.first().startTime,
+                cycles = cycles.map { entity ->
+                    SleepCycle(
+                        phase = entity.phase,
+                        startTime = entity.startTime,
+                        endTime = entity.endTime
+                    )
+                }
+            )
+        }.sortedByDescending { it.date }
     }
 
     class Factory(
