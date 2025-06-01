@@ -38,17 +38,39 @@ fun DailySleepCarousel(
         return
     }
 
-    if (sleepDataList.isEmpty()) {
-        EmptySleepData(modifier = modifier)
-        return
-    }
-
-    val pagerState = rememberPagerState(pageCount = { sleepDataList.size })
-    
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        if (sleepDataList.isEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                EmptySleepData()
+                
+                // Settings button
+                Button(
+                    onClick = { showSettings = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Text(
+                        text = "Settings",
+                        fontSize = 14.sp,
+                        color = Color.White
+                    )
+                }
+            }
+            return
+        }
+
+        val pagerState = rememberPagerState(pageCount = { sleepDataList.size })
+        
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize()
