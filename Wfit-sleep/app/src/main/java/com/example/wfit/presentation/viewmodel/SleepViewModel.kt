@@ -124,7 +124,7 @@ class SleepViewModel(
             .groupBy { it.startTime.toLocalDate() }
             .map { (date, cycles) ->
                 DailySleepData(
-                    date = date.atStartOfDay(),
+                    date = cycles.first().startTime,
                     cycles = cycles.map { entity ->
                         SleepCycle(
                             phase = entity.phase,
