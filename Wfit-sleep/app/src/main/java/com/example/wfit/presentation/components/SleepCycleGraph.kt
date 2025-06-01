@@ -75,7 +75,7 @@ fun SleepCycleGraph(
             val totalMinutes = ChronoUnit.MINUTES.between(
                 sleepData.cycles.first().startTime,
                 sleepData.cycles.last().endTime
-            )
+            ).toFloat()
 
             var currentX = 0f
             sleepData.cycles.forEach { cycle ->
