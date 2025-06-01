@@ -12,9 +12,11 @@ import androidx.wear.compose.material.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.wfit.R
 import com.example.wfit.presentation.model.DailySleepData
 import com.example.wfit.presentation.model.SleepPhase
 import java.time.format.DateTimeFormatter
@@ -53,16 +55,20 @@ fun DailySleepCarousel(
                 EmptySleepData()
                 
                 // Settings button
-                Button(
-                    onClick = { showSettings = true },
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+                        .size(48.dp)
+                        .background(Color.DarkGray, shape = MaterialTheme.shapes.small)
+                        .padding(12.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "Settings",
-                        fontSize = 14.sp,
-                        color = Color.White
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_settings),
+                        contentDescription = "Settings",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { showSettings = true }
                     )
                 }
             }
@@ -153,16 +159,20 @@ fun DailySleepCarousel(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 // Settings button
-                Button(
-                    onClick = { showSettings = true },
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+                        .size(48.dp)
+                        .background(Color.DarkGray, shape = MaterialTheme.shapes.small)
+                        .padding(12.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "Settings",
-                        fontSize = 14.sp,
-                        color = Color.White
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_settings),
+                        contentDescription = "Settings",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clickable { showSettings = true }
                     )
                 }
                 
