@@ -15,6 +15,9 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
+        vectorDrawables {
+            useSupportLibrary = true
+        }
     }
 
     splits {
@@ -54,6 +57,16 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.1"
+    }
+
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
 
@@ -101,4 +114,7 @@ dependencies {
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.test.manifest)
     debugImplementation(libs.tiles.tooling)
+
+    // Sensors
+    implementation("androidx.wear:wear-sensors:1.0.0")
 }

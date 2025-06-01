@@ -29,15 +29,22 @@ class SleepMonitoringService : LifecycleService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private lateinit var database: SleepDatabase
     private lateinit var wakeLock: PowerManager.WakeLock
+    private lateinit var sensorManager: SleepSensorManager
+    
     private var isMonitoring = false
     private var lastMovementTime: LocalDateTime = LocalDateTime.now()
     private var currentPhase: SleepPhase = SleepPhase.AWAKE
     private var lastPhaseChange: LocalDateTime = LocalDateTime.now()
     private var isTrackingEnabled = true
-
+    
+    private var movementCounter = 0
+    private var heartRateSum = 0f
+    private var heartRateReadings = 0
+    
     override fun onCreate() {
         super.onCreate()
         database = SleepDatabase.getDatabase(this)
+        sensorManager = SleepSensorManager(this)
         createNotificationChannel()
         acquireWakeLock()
     }
@@ -65,6 +72,7 @@ class SleepMonitoringService : LifecycleService() {
         if (isMonitoring || !isTrackingEnabled) return
         
         isMonitoring = true
+        sensorManager.startMonitoring()
         startForeground(NOTIFICATION_ID, createNotification())
         
         serviceScope.launch {
@@ -89,28 +97,45 @@ class SleepMonitoringService : LifecycleService() {
                 delay(MONITORING_INTERVAL)
             }
         }
+        
+        // Monitorear los sensores
+        serviceScope.launch {
+            sensorManager.movementDetected.collect { movement ->
+                if (movement) {
+                    movementCounter++
+                    lastMovementTime = LocalDateTime.now()
+                }
+            }
+        }
+        
+        serviceScope.launch {
+            sensorManager.heartRate.collect { rate ->
+                if (rate > 0) {
+                    heartRateSum += rate
+                    heartRateReadings++
+                }
+            }
+        }
     }
 
     private suspend fun monitorSleepCycle() {
         val now = LocalDateTime.now()
         
-        // Simulate movement detection (in a real app, this would use sensors)
-        val movementDetected = simulateMovementDetection()
-        
-        if (movementDetected) {
-            lastMovementTime = now
-        }
-        
-        // Determine sleep phase based on movement patterns
+        // Determinar fase del sueño basado en sensores
         val newPhase = determineSleepPhase(now)
         
         if (newPhase != currentPhase) {
-            // Save the previous phase
+            // Guardar la fase anterior
             saveSleepCycle(currentPhase, lastPhaseChange, now)
             
-            // Update current phase
+            // Actualizar fase actual
             currentPhase = newPhase
             lastPhaseChange = now
+            
+            // Resetear contadores
+            movementCounter = 0
+            heartRateSum = 0f
+            heartRateReadings = 0
         }
     }
 
@@ -125,23 +150,26 @@ class SleepMonitoringService : LifecycleService() {
 
     private fun determineSleepPhase(now: LocalDateTime): SleepPhase {
         val minutesSinceLastMovement = java.time.Duration.between(lastMovementTime, now).toMinutes()
+        val averageHeartRate = if (heartRateReadings > 0) heartRateSum / heartRateReadings else 0f
         
         return when {
-            minutesSinceLastMovement < 5 -> SleepPhase.AWAKE
-            minutesSinceLastMovement < 20 -> SleepPhase.LIGHT_SLEEP
-            minutesSinceLastMovement < 40 -> SleepPhase.DEEP_SLEEP
+            // Alta actividad y ritmo cardíaco elevado = Despierto
+            minutesSinceLastMovement < 5 && movementCounter > 10 -> SleepPhase.AWAKE
+            
+            // Poco movimiento y ritmo cardíaco estable = Sueño ligero
+            minutesSinceLastMovement < 20 && averageHeartRate > 50 -> SleepPhase.LIGHT_SLEEP
+            
+            // Muy poco movimiento y ritmo cardíaco bajo = Sueño profundo
+            minutesSinceLastMovement < 40 && averageHeartRate < 50 -> SleepPhase.DEEP_SLEEP
+            
+            // Algo de movimiento y variación en ritmo cardíaco = REM
             else -> SleepPhase.REM
         }
     }
 
-    private fun simulateMovementDetection(): Boolean {
-        // Simulate random movement detection
-        // In a real app, this would use the device's sensors
-        return Math.random() < 0.3
-    }
-
     private fun stopMonitoring() {
         isMonitoring = false
+        sensorManager.stopMonitoring()
         stopForeground(true)
         stopSelf()
     }
@@ -183,6 +211,7 @@ class SleepMonitoringService : LifecycleService() {
         if (wakeLock.isHeld) {
             wakeLock.release()
         }
+        sensorManager.stopMonitoring()
     }
 
     companion object {
