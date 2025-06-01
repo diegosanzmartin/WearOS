@@ -77,6 +77,12 @@ fun SleepCycleGraph(
                 sleepData.cycles.last().endTime
             ).toFloat()
 
+            // Log para verificar los ciclos
+            android.util.Log.d("SleepCycleGraph", "Dibujando ciclos:")
+            sleepData.cycles.forEach { cycle ->
+                android.util.Log.d("SleepCycleGraph", "Ciclo: ${cycle.phase} de ${cycle.startTime} a ${cycle.endTime} (${cycle.durationMinutes} minutos)")
+            }
+
             var currentX = 0f
             sleepData.cycles.forEach { cycle ->
                 val cycleWidth = (width * cycle.durationMinutes / totalMinutes)
@@ -86,6 +92,9 @@ fun SleepCycleGraph(
                     SleepPhase.DEEP_SLEEP -> height * 0.8f
                     SleepPhase.REM -> height * 0.6f
                 }
+
+                // Log para verificar el cálculo de dimensiones
+                android.util.Log.d("SleepCycleGraph", "Dibujando ciclo ${cycle.phase}: x=$currentX, width=$cycleWidth, y=$y")
 
                 // Crear un path para el área de cada fase
                 val phasePath = Path().apply {

@@ -121,10 +121,14 @@ fun DailySleepCarousel(
                 ) {
                     val totalTime = dailyData.totalSleepTime
                     
+                    // Log para verificar el tiempo total
+                    android.util.Log.d("DailySleepCarousel", "Tiempo total de sueño: $totalTime minutos")
+                    
                     // Deep Sleep
                     val deepSleepTime = dailyData.cycles
                         .filter { it.phase == SleepPhase.DEEP_SLEEP }
                         .sumOf { it.durationMinutes }
+                    android.util.Log.d("DailySleepCarousel", "Tiempo de sueño profundo: $deepSleepTime minutos")
                     PhaseTimeDetail(
                         phase = "Profundo",
                         minutes = deepSleepTime,
@@ -136,6 +140,7 @@ fun DailySleepCarousel(
                     val lightSleepTime = dailyData.cycles
                         .filter { it.phase == SleepPhase.LIGHT_SLEEP }
                         .sumOf { it.durationMinutes }
+                    android.util.Log.d("DailySleepCarousel", "Tiempo de sueño ligero: $lightSleepTime minutos")
                     PhaseTimeDetail(
                         phase = "Ligero",
                         minutes = lightSleepTime,
@@ -147,6 +152,7 @@ fun DailySleepCarousel(
                     val remTime = dailyData.cycles
                         .filter { it.phase == SleepPhase.REM }
                         .sumOf { it.durationMinutes }
+                    android.util.Log.d("DailySleepCarousel", "Tiempo de REM: $remTime minutos")
                     PhaseTimeDetail(
                         phase = "REM",
                         minutes = remTime,
@@ -158,6 +164,7 @@ fun DailySleepCarousel(
                     val awakeTime = dailyData.cycles
                         .filter { it.phase == SleepPhase.AWAKE }
                         .sumOf { it.durationMinutes }
+                    android.util.Log.d("DailySleepCarousel", "Tiempo despierto: $awakeTime minutos")
                     PhaseTimeDetail(
                         phase = "Despierto",
                         minutes = awakeTime,

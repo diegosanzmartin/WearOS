@@ -142,6 +142,12 @@ class SleepViewModel(
         }
 
         return groupedCycles.map { (date, cycles) ->
+            // Log para verificar los ciclos
+            android.util.Log.d("SleepViewModel", "Procesando ciclos para el día $date:")
+            cycles.forEach { cycle ->
+                android.util.Log.d("SleepViewModel", "Ciclo: ${cycle.phase} de ${cycle.startTime} a ${cycle.endTime} (${cycle.durationMinutes} minutos)")
+            }
+
             DailySleepData(
                 date = cycles.first().startTime,
                 cycles = cycles.map { entity ->
