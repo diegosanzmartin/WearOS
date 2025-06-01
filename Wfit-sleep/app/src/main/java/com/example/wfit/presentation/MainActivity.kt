@@ -8,65 +8,90 @@ package com.example.wfit.presentation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.Color
 import androidx.wear.compose.material.MaterialTheme
-import androidx.wear.compose.material.Text
-import androidx.wear.compose.material.TimeText
-import androidx.wear.tooling.preview.devices.WearDevices
-import com.example.wfit.R
-import com.example.wfit.presentation.theme.WfitTheme
+import androidx.wear.compose.material.Scaffold
+import com.example.wfit.presentation.components.DailySleepCarousel
+import com.example.wfit.presentation.model.DailySleepData
+import com.example.wfit.presentation.model.SleepCycle
+import com.example.wfit.presentation.model.SleepPhase
+import java.time.LocalDateTime
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        installSplashScreen()
-
         super.onCreate(savedInstanceState)
-
-        setTheme(android.R.style.Theme_DeviceDefault)
-
+        
+        // TODO: Esto será reemplazado por datos reales de los sensores
+        val mockSleepData = createMockSleepData()
+        
         setContent {
-            WearApp("Android")
+            WearApp {
+                DailySleepCarousel(
+                    sleepDataList = mockSleepData,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
+    }
+    
+    private fun createMockSleepData(): List<DailySleepData> {
+        val now = LocalDateTime.now()
+        return listOf(
+            createDailySleepData(now.minusDays(2)),
+            createDailySleepData(now.minusDays(1)),
+            createDailySleepData(now)
+        )
+    }
+    
+    private fun createDailySleepData(date: LocalDateTime): DailySleepData {
+        val startTime = date.withHour(23).withMinute(0)
+        return DailySleepData(
+            date = date,
+            cycles = listOf(
+                SleepCycle(
+                    phase = SleepPhase.AWAKE,
+                    startTime = startTime,
+                    endTime = startTime.plusMinutes(20)
+                ),
+                SleepCycle(
+                    phase = SleepPhase.LIGHT_SLEEP,
+                    startTime = startTime.plusMinutes(20),
+                    endTime = startTime.plusMinutes(90)
+                ),
+                SleepCycle(
+                    phase = SleepPhase.DEEP_SLEEP,
+                    startTime = startTime.plusMinutes(90),
+                    endTime = startTime.plusMinutes(150)
+                ),
+                SleepCycle(
+                    phase = SleepPhase.REM,
+                    startTime = startTime.plusMinutes(150),
+                    endTime = startTime.plusMinutes(210)
+                ),
+                // Repetir patrón...
+                SleepCycle(
+                    phase = SleepPhase.LIGHT_SLEEP,
+                    startTime = startTime.plusMinutes(210),
+                    endTime = startTime.plusMinutes(270)
+                )
+            )
+        )
     }
 }
 
 @Composable
-fun WearApp(greetingName: String) {
-    WfitTheme {
-        Box(
+fun WearApp(content: @Composable () -> Unit) {
+    MaterialTheme {
+        Scaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colors.background),
-            contentAlignment = Alignment.Center
+                .background(Color.Black)
         ) {
-            TimeText()
-            Greeting(greetingName = greetingName)
+            content()
         }
     }
-}
-
-@Composable
-fun Greeting(greetingName: String) {
-    Text(
-        modifier = Modifier.fillMaxWidth(),
-        textAlign = TextAlign.Center,
-        color = MaterialTheme.colors.primary,
-        text = stringResource(R.string.hello_world, greetingName)
-    )
-}
-
-@Preview(device = WearDevices.SMALL_ROUND, showSystemUi = true)
-@Composable
-fun DefaultPreview() {
-    WearApp("Preview Android")
 }
