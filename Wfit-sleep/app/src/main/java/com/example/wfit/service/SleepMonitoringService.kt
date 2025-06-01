@@ -171,8 +171,11 @@ class SleepMonitoringService : LifecycleService() {
     }
 
     private fun stopForegroundAndSelf() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            stopForeground(Service.STOP_FOREGROUND_REMOVE)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            stopForeground(STOPFOREGROUND_REMOVE)
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            @Suppress("DEPRECATION")
+            stopForeground(true)
         } else {
             @Suppress("DEPRECATION")
             stopForeground(true)
@@ -225,6 +228,7 @@ class SleepMonitoringService : LifecycleService() {
         private const val CHANNEL_ID = "sleep_monitoring_channel"
         private const val NOTIFICATION_ID = 1
         private const val MONITORING_INTERVAL = 5 * 60 * 1000L // 5 minutes
+        private const val STOPFOREGROUND_REMOVE = 1
         
         const val ACTION_START_MONITORING = "com.example.wfit.ACTION_START_MONITORING"
         const val ACTION_STOP_MONITORING = "com.example.wfit.ACTION_STOP_MONITORING"
