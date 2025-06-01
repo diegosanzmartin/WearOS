@@ -51,9 +51,13 @@ fun SettingsMenu(
             )
         }
 
-        Divider(
-            color = Color.Gray.copy(alpha = 0.3f),
-            modifier = Modifier.padding(vertical = 8.dp)
+        // Divider
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(Color.Gray.copy(alpha = 0.3f))
+                .padding(vertical = 8.dp)
         )
 
         // Version info
