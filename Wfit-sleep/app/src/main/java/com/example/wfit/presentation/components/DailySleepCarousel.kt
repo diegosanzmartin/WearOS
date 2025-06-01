@@ -25,6 +25,11 @@ fun DailySleepCarousel(
     sleepDataList: List<DailySleepData>,
     modifier: Modifier = Modifier
 ) {
+    if (sleepDataList.isEmpty()) {
+        EmptySleepData(modifier = modifier)
+        return
+    }
+
     val pagerState = rememberPagerState(pageCount = { sleepDataList.size })
     
     Column(
@@ -171,7 +176,12 @@ private fun PhaseTimeDetail(
         "Despierto" to Color(0xFFFF9800)       // Naranja
     )
 
-    val percentage = (minutes.toFloat() / totalMinutes.toFloat() * 100).toInt()
+    val percentage = if (totalMinutes > 0) {
+        (minutes.toFloat() / totalMinutes.toFloat() * 100).toInt()
+    } else {
+        0
+    }
+    
     val hours = minutes / 60
     val remainingMinutes = minutes % 60
     val timeText = if (hours > 0) {
