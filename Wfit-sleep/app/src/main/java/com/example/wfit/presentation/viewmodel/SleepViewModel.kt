@@ -25,86 +25,11 @@ class SleepViewModel(
     val sleepData: StateFlow<List<DailySleepData>> = _sleepData.asStateFlow()
 
     private val _isTrackingEnabled = MutableStateFlow(true)
-    val isTrackingEnabled: StateFlow<Boolean> = _isTrackingEnabled.asStateFlow()
+    val isTrackingEnabled: StateFlow<Boolean> = _isTrackingEnabled
 
     init {
         loadSleepData()
         cleanOldData()
-        
-        // Add test data for today
-        viewModelScope.launch {
-            val today = LocalDate.now()
-            // Borrar TODOS los datos antes de insertar los nuevos
-            database.sleepCycleDao().deleteSleepCyclesBefore(today.plusDays(7).atStartOfDay())
-            
-            val startTime = today.atTime(23, 0) // 11:00 PM
-            val cycles = listOf(
-                SleepCycleEntity(
-                    phase = SleepPhase.AWAKE,
-                    startTime = startTime,
-                    endTime = startTime.plusMinutes(30)
-                ),
-                SleepCycleEntity(
-                    phase = SleepPhase.LIGHT_SLEEP,
-                    startTime = startTime.plusMinutes(30),
-                    endTime = startTime.plusMinutes(90)
-                ),
-                SleepCycleEntity(
-                    phase = SleepPhase.DEEP_SLEEP,
-                    startTime = startTime.plusMinutes(90),
-                    endTime = startTime.plusMinutes(150)
-                ),
-                SleepCycleEntity(
-                    phase = SleepPhase.REM,
-                    startTime = startTime.plusMinutes(150),
-                    endTime = startTime.plusMinutes(180)
-                ),
-                SleepCycleEntity(
-                    phase = SleepPhase.LIGHT_SLEEP,
-                    startTime = startTime.plusMinutes(180),
-                    endTime = startTime.plusMinutes(240)
-                ),
-                SleepCycleEntity(
-                    phase = SleepPhase.DEEP_SLEEP,
-                    startTime = startTime.plusMinutes(240),
-                    endTime = startTime.plusMinutes(300)
-                ),
-                SleepCycleEntity(
-                    phase = SleepPhase.REM,
-                    startTime = startTime.plusMinutes(300),
-                    endTime = startTime.plusMinutes(330)
-                ),
-                SleepCycleEntity(
-                    phase = SleepPhase.LIGHT_SLEEP,
-                    startTime = startTime.plusMinutes(330),
-                    endTime = startTime.plusMinutes(390)
-                ),
-                SleepCycleEntity(
-                    phase = SleepPhase.AWAKE,
-                    startTime = startTime.plusMinutes(390),
-                    endTime = startTime.plusMinutes(420)
-                )
-            )
-            
-            // Log para verificar los ciclos antes de insertarlos
-            android.util.Log.d("SleepViewModel", "Intentando insertar ciclos de prueba:")
-            cycles.forEach { cycle ->
-                android.util.Log.d("SleepViewModel", "Ciclo a insertar: ${cycle.phase} de ${cycle.startTime} a ${cycle.endTime} (${cycle.durationMinutes} minutos)")
-            }
-            
-            database.sleepCycleDao().insertAll(cycles)
-            
-            // Verificar que los ciclos se insertaron correctamente
-            val insertedCycles = database.sleepCycleDao().getSleepCyclesBetween(
-                today.atStartOfDay(),
-                today.plusDays(2).atStartOfDay()
-            ).first()
-            
-            android.util.Log.d("SleepViewModel", "Ciclos insertados en la base de datos:")
-            insertedCycles.forEach { cycle ->
-                android.util.Log.d("SleepViewModel", "Ciclo insertado: ${cycle.phase} de ${cycle.startTime} a ${cycle.endTime} (${cycle.durationMinutes} minutos)")
-            }
-        }
     }
 
     fun toggleTracking() {
