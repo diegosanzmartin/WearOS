@@ -127,7 +127,7 @@ class SleepMonitoringService : LifecycleService() {
 
     private fun determineSleepPhase(): SleepPhase {
         val minutesSinceLastMovement = sensorManager.getTimeSinceLastMovement().toMinutes()
-        val currentHeartRate = sensorManager.heartRate.value
+        val currentHeartRate = sensorManager.heartRate.value.toInt()
         
         return when {
             minutesSinceLastMovement < 5 && currentHeartRate > 70 -> SleepPhase.AWAKE
