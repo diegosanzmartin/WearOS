@@ -144,8 +144,22 @@ class SleepMonitoringService : LifecycleService() {
         sensorManager.stopMonitoring()
         
         serviceScope.launch(Dispatchers.Main) {
-            stopForeground(true)
+            safeStopForeground()
             stopSelf()
+        }
+    }
+
+    private fun safeStopForeground() {
+        runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                stopForeground(STOP_FOREGROUND_DETACH)
+            } else {
+                @Suppress("DEPRECATION")
+                stopForeground(true)
+            }
+        }.onFailure {
+            @Suppress("DEPRECATION")
+            stopForeground(true)
         }
     }
 
@@ -196,6 +210,7 @@ class SleepMonitoringService : LifecycleService() {
         private const val CHANNEL_ID = "sleep_monitoring_channel"
         private const val NOTIFICATION_ID = 1
         private const val MONITORING_INTERVAL = 5 * 60 * 1000L // 5 minutes
+        private const val STOP_FOREGROUND_DETACH = 1
         
         const val ACTION_START_MONITORING = "com.example.wfit.ACTION_START_MONITORING"
         const val ACTION_STOP_MONITORING = "com.example.wfit.ACTION_STOP_MONITORING"
