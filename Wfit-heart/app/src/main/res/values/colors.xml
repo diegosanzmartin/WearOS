@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#000000</color>
+    <color name="primary">#FF0000</color>
+    <color name="accent">#0000FF</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B3FFFFFF</color>
+    <color name="max_threshold">#FF0000</color>
+    <color name="min_threshold">#0000FF</color>
+    <color name="graph_line">#FFFFFF</color>
+    <color name="max_point">#FF0000</color>
+    <color name="min_point">#0000FF</color>
+</resources> 
