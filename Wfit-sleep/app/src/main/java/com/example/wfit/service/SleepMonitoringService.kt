@@ -1,4 +1,4 @@
-package com.example.wfit.service
+package com.wfit.sleep.service
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -8,10 +8,10 @@ import android.os.Build
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
-import com.example.wfit.R
-import com.example.wfit.data.db.SleepDatabase
-import com.example.wfit.data.db.entity.SleepCycleEntity
-import com.example.wfit.presentation.model.SleepPhase
+import com.wfit.sleep.R
+import com.wfit.sleep.data.db.SleepDatabase
+import com.wfit.sleep.data.db.entity.SleepCycleEntity
+import com.wfit.sleep.presentation.model.SleepPhase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -212,9 +212,9 @@ class SleepMonitoringService : LifecycleService() {
         private const val MONITORING_INTERVAL = 5 * 60 * 1000L // 5 minutes
         private const val STOP_FOREGROUND_DETACH = 1
         
-        const val ACTION_START_MONITORING = "com.example.wfit.ACTION_START_MONITORING"
-        const val ACTION_STOP_MONITORING = "com.example.wfit.ACTION_STOP_MONITORING"
-        const val ACTION_SET_TRACKING_STATE = "com.example.wfit.ACTION_SET_TRACKING_STATE"
+        const val ACTION_START_MONITORING = "com.wfit.sleep.ACTION_START_MONITORING"
+        const val ACTION_STOP_MONITORING = "com.wfit.sleep.ACTION_STOP_MONITORING"
+        const val ACTION_SET_TRACKING_STATE = "com.wfit.sleep.ACTION_SET_TRACKING_STATE"
         const val EXTRA_TRACKING_STATE = "tracking_state"
     }
 } 

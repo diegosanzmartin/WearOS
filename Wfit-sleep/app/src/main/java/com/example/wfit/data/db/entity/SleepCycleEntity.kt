@@ -1,8 +1,8 @@
-package com.example.wfit.data.db.entity
+package com.wfit.sleep.data.db.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.wfit.presentation.model.SleepPhase
+import com.wfit.sleep.presentation.model.SleepPhase
 import java.time.LocalDateTime
 
 @Entity(tableName = "sleep_cycles")

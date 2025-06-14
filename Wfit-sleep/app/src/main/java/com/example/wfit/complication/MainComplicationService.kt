@@ -1,4 +1,4 @@
-package com.example.wfit.complication
+package com.wfit.sleep.complication
 
 import androidx.wear.watchface.complications.data.ComplicationData
 import androidx.wear.watchface.complications.data.ComplicationType

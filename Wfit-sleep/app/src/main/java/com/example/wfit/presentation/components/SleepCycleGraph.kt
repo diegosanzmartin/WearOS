@@ -1,4 +1,4 @@
-package com.example.wfit.presentation.components
+package com.wfit.sleep.presentation.components
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
@@ -14,8 +14,8 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.dp
 import android.graphics.Paint
 import android.graphics.Typeface
-import com.example.wfit.presentation.model.DailySleepData
-import com.example.wfit.presentation.model.SleepPhase
+import com.wfit.sleep.presentation.model.DailySleepData
+import com.wfit.sleep.presentation.model.SleepPhase
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 

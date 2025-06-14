@@ -1,4 +1,4 @@
-package com.example.wfit.presentation.theme
+package com.wfit.sleep.presentation.theme
 
 import androidx.compose.runtime.Composable
 import androidx.wear.compose.material.MaterialTheme

@@ -1,4 +1,4 @@
-package com.example.wfit.presentation.components
+package com.wfit.sleep.presentation.components
 
 import android.graphics.Paint
 import android.graphics.Typeface

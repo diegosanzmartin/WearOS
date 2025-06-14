@@ -1,4 +1,4 @@
-package com.example.wfit.presentation.model
+package com.wfit.sleep.presentation.model
 
 import java.time.LocalDateTime
 

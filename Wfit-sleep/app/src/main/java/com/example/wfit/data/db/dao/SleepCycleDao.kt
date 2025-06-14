@@ -1,7 +1,7 @@
-package com.example.wfit.data.db.dao
+package com.wfit.sleep.data.db.dao
 
 import androidx.room.*
-import com.example.wfit.data.db.entity.SleepCycleEntity
+import com.wfit.sleep.data.db.entity.SleepCycleEntity
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 

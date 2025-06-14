@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.wfit"
+    namespace = "com.wfit.sleep"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.wfit"
+        applicationId = "com.wfit.sleep"
         minSdk = 30
         targetSdk = 34
         versionCode = 1

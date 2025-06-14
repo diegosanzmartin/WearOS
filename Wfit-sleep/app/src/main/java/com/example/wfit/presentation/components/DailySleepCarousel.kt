@@ -1,4 +1,4 @@
-package com.example.wfit.presentation.components
+package com.wfit.sleep.presentation.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -17,9 +17,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.wfit.R
-import com.example.wfit.presentation.model.DailySleepData
-import com.example.wfit.presentation.model.SleepPhase
+import com.wfit.sleep.R
+import com.wfit.sleep.presentation.model.DailySleepData
+import com.wfit.sleep.presentation.model.SleepPhase
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalFoundationApi::class)

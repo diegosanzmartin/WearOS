@@ -3,7 +3,7 @@
  * most up to date changes to the libraries and their usages.
  */
 
-package com.example.wfit.presentation
+package com.wfit.sleep.presentation
 
 import android.Manifest
 import android.content.Intent
@@ -24,10 +24,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Scaffold
-import com.example.wfit.data.db.SleepDatabase
-import com.example.wfit.presentation.components.DailySleepCarousel
-import com.example.wfit.presentation.viewmodel.SleepViewModel
-import com.example.wfit.service.SleepMonitoringService
+import com.wfit.sleep.data.db.SleepDatabase
+import com.wfit.sleep.presentation.components.DailySleepCarousel
+import com.wfit.sleep.presentation.viewmodel.SleepViewModel
+import com.wfit.sleep.service.SleepMonitoringService
 
 class MainActivity : ComponentActivity() {
     private val requiredPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

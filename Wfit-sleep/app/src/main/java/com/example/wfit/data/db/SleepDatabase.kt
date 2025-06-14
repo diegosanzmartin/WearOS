@@ -1,12 +1,12 @@
-package com.example.wfit.data.db
+package com.wfit.sleep.data.db
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.example.wfit.data.db.dao.SleepCycleDao
-import com.example.wfit.data.db.entity.SleepCycleEntity
+import com.wfit.sleep.data.db.dao.SleepCycleDao
+import com.wfit.sleep.data.db.entity.SleepCycleEntity
 import java.time.LocalDateTime
 
 @Database(entities = [SleepCycleEntity::class], version = 1)

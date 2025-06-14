@@ -1,4 +1,4 @@
-package com.example.wfit.presentation.components
+package com.wfit.sleep.presentation.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background

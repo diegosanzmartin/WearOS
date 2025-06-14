@@ -1,4 +1,4 @@
-package com.example.wfit.service
+package com.wfit.sleep.service
 
 import android.content.Context
 import android.hardware.Sensor

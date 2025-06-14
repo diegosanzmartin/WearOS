@@ -1,16 +1,16 @@
-package com.example.wfit.presentation.viewmodel
+package com.wfit.sleep.presentation.viewmodel
 
 import android.content.Context
 import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.wfit.data.db.SleepDatabase
-import com.example.wfit.data.db.entity.SleepCycleEntity
-import com.example.wfit.presentation.model.DailySleepData
-import com.example.wfit.presentation.model.SleepCycle
-import com.example.wfit.presentation.model.SleepPhase
-import com.example.wfit.service.SleepMonitoringService
+import com.wfit.sleep.data.db.SleepDatabase
+import com.wfit.sleep.data.db.entity.SleepCycleEntity
+import com.wfit.sleep.presentation.model.DailySleepData
+import com.wfit.sleep.presentation.model.SleepCycle
+import com.wfit.sleep.presentation.model.SleepPhase
+import com.wfit.sleep.service.SleepMonitoringService
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
