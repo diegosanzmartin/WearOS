@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.*
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.wfit.heart.R
@@ -87,13 +88,14 @@ fun WearApp() {
             contentAlignment = Alignment.Center
         ) {
             TimeText()
-            HeartRateScreen(viewModel)
+            HeartRateScreen()
         }
     }
 }
 
 @Composable
-fun HeartRateScreen(viewModel: HeartRateViewModel) {
+fun HeartRateScreen() {
+    val viewModel: HeartRateViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     
     Column(
@@ -106,7 +108,7 @@ fun HeartRateScreen(viewModel: HeartRateViewModel) {
         // Título
         Text(
             text = stringResource(R.string.heart_rate_title),
-            style = MaterialTheme.typography.h6,
+            style = MaterialTheme.typography.title2,
             color = MaterialTheme.colors.primary,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
@@ -134,7 +136,7 @@ fun HeartRateScreen(viewModel: HeartRateViewModel) {
                     uiState.heartRate != null -> uiState.heartRate.toString()
                     else -> stringResource(R.string.no_heart_rate)
                 },
-                style = MaterialTheme.typography.h3.copy(
+                style = MaterialTheme.typography.title1.copy(
                     fontWeight = FontWeight.Bold,
                     fontSize = 32.sp
                 ),
@@ -147,7 +149,7 @@ fun HeartRateScreen(viewModel: HeartRateViewModel) {
         // Unidad
         Text(
             text = stringResource(R.string.heart_rate_unit),
-            style = MaterialTheme.typography.caption,
+            style = MaterialTheme.typography.body2,
             color = MaterialTheme.colors.onBackground
         )
         
@@ -157,7 +159,7 @@ fun HeartRateScreen(viewModel: HeartRateViewModel) {
         if (!uiState.sensorAvailable) {
             Text(
                 text = stringResource(R.string.sensor_not_available),
-                style = MaterialTheme.typography.caption,
+                style = MaterialTheme.typography.body2,
                 color = Color(0xFFF44336),
                 textAlign = TextAlign.Center
             )
@@ -185,7 +187,7 @@ fun HeartRateScreen(viewModel: HeartRateViewModel) {
                 uiState.isMonitoring -> stringResource(R.string.monitoring_status)
                 else -> stringResource(R.string.stopped_status)
             },
-            style = MaterialTheme.typography.caption,
+            style = MaterialTheme.typography.body2,
             color = when {
                 !uiState.sensorAvailable -> Color(0xFFF44336)
                 uiState.isMonitoring -> Color(0xFF4CAF50)

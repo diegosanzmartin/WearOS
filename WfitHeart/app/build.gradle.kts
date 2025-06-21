@@ -32,7 +32,7 @@ android {
             .map { it as com.android.build.gradle.internal.api.BaseVariantOutputImpl }
             .forEach { output ->
                 val abi = output.getFilter(com.android.build.OutputFile.ABI)
-                output.outputFileName = "WFitSleep_${variant.versionName}_${abi}.apk"
+                output.outputFileName = "WFitHeart_${variant.versionName}_${abi}.apk"
             }
     }
 
