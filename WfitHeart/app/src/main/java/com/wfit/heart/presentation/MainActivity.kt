@@ -32,7 +32,14 @@ import androidx.wear.compose.material.*
 import androidx.wear.tooling.preview.devices.WearDevices
 import com.wfit.heart.R
 import com.wfit.heart.presentation.theme.WfitHeartTheme
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.PathParser
 
 class MainActivity : ComponentActivity() {
     
@@ -97,7 +104,7 @@ fun WearApp() {
 fun HeartRateScreen() {
     val viewModel: HeartRateViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -105,95 +112,54 @@ fun HeartRateScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Título
-        Text(
-            text = stringResource(R.string.heart_rate_title),
-            style = MaterialTheme.typography.title2,
-            color = MaterialTheme.colors.primary,
-            textAlign = TextAlign.Center,
+        if (uiState.isMonitoring) {
+            Chip(
+                onClick = { /* No-op */ },
+                label = { Text(stringResource(id = R.string.monitoring_status)) },
+                colors = ChipDefaults.chipColors(backgroundColor = Color(0xFF4CAF50)),
+            )
+        } else if (!uiState.sensorAvailable) {
+            Chip(
+                onClick = { /* No-op */ },
+                label = { Text(stringResource(id = R.string.sensor_not_available)) },
+                colors = ChipDefaults.chipColors(backgroundColor = Color(0xFFF44336)),
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Indicador de ritmo cardíaco
-        Box(
-            modifier = Modifier
-                .size(120.dp)
-                .clip(CircleShape)
-                .background(
-                    when {
-                        !uiState.sensorAvailable -> Color(0xFFF44336) // Rojo si no hay sensor
-                        uiState.isMonitoring -> Color(0xFF4CAF50) // Verde si está monitoreando
-                        else -> Color(0xFF9E9E9E) // Gris si está detenido
-                    }
-                ),
-            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = when {
-                    !uiState.sensorAvailable -> stringResource(R.string.sensor_na)
+                    !uiState.sensorAvailable -> "--"
                     uiState.heartRate != null -> uiState.heartRate.toString()
-                    else -> stringResource(R.string.no_heart_rate)
+                    else -> "--"
                 },
-                style = MaterialTheme.typography.title1.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 32.sp
-                ),
-                color = Color.White
+                style = MaterialTheme.typography.display1,
+                color = Color.White,
+                modifier = Modifier.align(Alignment.CenterVertically)
             )
-        }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        // Unidad
-        Text(
-            text = stringResource(R.string.heart_rate_unit),
-            style = MaterialTheme.typography.body2,
-            color = MaterialTheme.colors.onBackground
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Estado del sensor
-        if (!uiState.sensorAvailable) {
-            Text(
-                text = stringResource(R.string.sensor_not_available),
-                style = MaterialTheme.typography.body2,
-                color = Color(0xFFF44336),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-        }
-        
-        // Botón de control
-        Button(
-            onClick = { viewModel.toggleMonitoring() },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = uiState.sensorAvailable
-        ) {
-            Text(
-                text = if (uiState.isMonitoring) stringResource(R.string.stop_monitoring) else stringResource(R.string.start_monitoring),
-                style = MaterialTheme.typography.button
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        // Estado del monitoreo
-        Text(
-            text = when {
-                !uiState.sensorAvailable -> stringResource(R.string.sensor_not_available)
-                uiState.isMonitoring -> stringResource(R.string.monitoring_status)
-                else -> stringResource(R.string.stopped_status)
-            },
-            style = MaterialTheme.typography.body2,
-            color = when {
-                !uiState.sensorAvailable -> Color(0xFFF44336)
-                uiState.isMonitoring -> Color(0xFF4CAF50)
-                else -> Color(0xFF9E9E9E)
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_heart),
+                    contentDescription = "Heart Icon",
+                    modifier = Modifier.size(32.dp),
+                    tint = Color.Red
+                )
+                Text(
+                    text = "Bpm",
+                    style = MaterialTheme.typography.body2,
+                    color = MaterialTheme.colors.onBackground
+                )
             }
-        )
+        }
     }
 }
 
