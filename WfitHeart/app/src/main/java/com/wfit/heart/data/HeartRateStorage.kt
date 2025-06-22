@@ -3,20 +3,51 @@ package com.wfit.heart.data
 import android.content.Context
 import android.content.SharedPreferences
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import com.google.gson.JsonPrimitive
+import com.google.gson.JsonSerializationContext
+import com.google.gson.JsonSerializer
 import com.google.gson.reflect.TypeToken
-import java.time.LocalTime
+import java.lang.reflect.Type
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class HeartRateStorage(context: Context) {
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-    private val gson = Gson()
-    private val timeFormatter = DateTimeFormatter.ISO_LOCAL_TIME
+    private val gson: Gson = createGson()
+    private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+
+    private fun createGson(): Gson {
+        return GsonBuilder()
+            .registerTypeAdapter(LocalDateTime::class.java,
+                object : JsonSerializer<LocalDateTime>, JsonDeserializer<LocalDateTime> {
+                    override fun serialize(
+                        src: LocalDateTime,
+                        typeOfSrc: Type,
+                        context: JsonSerializationContext
+                    ): JsonElement {
+                        return JsonPrimitive(dateTimeFormatter.format(src))
+                    }
+
+                    override fun deserialize(
+                        json: JsonElement,
+                        typeOfT: Type,
+                        context: JsonDeserializationContext
+                    ): LocalDateTime {
+                        return LocalDateTime.parse(json.asString, dateTimeFormatter)
+                    }
+                })
+            .create()
+    }
 
     fun saveMeasurements(measurements: List<HeartRateMeasurement>) {
         val measurementsData = measurements.map { measurement ->
             MeasurementData(
                 value = measurement.value,
-                time = measurement.time.format(timeFormatter)
+                timestamp = measurement.timestamp
             )
         }
         val json = gson.toJson(measurementsData)
@@ -31,7 +62,7 @@ class HeartRateStorage(context: Context) {
             measurementsData.map { data ->
                 HeartRateMeasurement(
                     value = data.value,
-                    time = LocalTime.parse(data.time, timeFormatter)
+                    timestamp = data.timestamp
                 )
             }
         } catch (e: Exception) {
@@ -41,7 +72,7 @@ class HeartRateStorage(context: Context) {
 
     private data class MeasurementData(
         val value: Int,
-        val time: String
+        val timestamp: LocalDateTime
     )
 
     companion object {

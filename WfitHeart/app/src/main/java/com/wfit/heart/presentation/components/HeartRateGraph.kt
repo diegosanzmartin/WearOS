@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.wfit.heart.data.HeartRateMeasurement
 import java.time.LocalTime
-import java.time.temporal.ChronoUnit
 
 @Composable
 fun HeartRateGraph(
@@ -29,7 +28,6 @@ fun HeartRateGraph(
             .height(120.dp)
             .padding(8.dp)
     ) {
-        // Líneas de la cuadrícula y etiquetas
         Canvas(modifier = Modifier.fillMaxSize()) {
             val width = size.width
             val height = size.height
@@ -61,12 +59,13 @@ fun HeartRateGraph(
             
             // Dibujar la línea de mediciones
             if (measurements.isNotEmpty()) {
-                val points = measurements.mapIndexed { index, measurement ->
-                    val x = (index.toFloat() / (measurements.size - 1)) * width
+                val points = measurements.map { measurement ->
+                    val hourOfDay = measurement.time.hour + (measurement.time.minute / 60f)
+                    val x = (hourOfDay / 24f) * width
                     val normalizedValue = (measurement.value - minValue).toFloat() / (maxValue - minValue)
                     val y = height - (normalizedValue * height)
                     Offset(x, y)
-                }
+                }.sortedBy { it.x }
                 
                 // Dibujar líneas entre puntos
                 for (i in 0 until points.size - 1) {

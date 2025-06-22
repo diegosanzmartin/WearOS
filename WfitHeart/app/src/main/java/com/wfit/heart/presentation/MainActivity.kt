@@ -105,7 +105,7 @@ fun WearApp() {
 fun HeartRateScreen() {
     val viewModel: HeartRateViewModel = viewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -138,9 +138,9 @@ fun HeartRateScreen() {
                 modifier = Modifier.height(24.dp)
             )
         }
-
+        
         Spacer(modifier = Modifier.height(8.dp))
-
+        
         Row(
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.Center,
@@ -156,9 +156,9 @@ fun HeartRateScreen() {
                 color = Color.White,
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
-
+            
             Spacer(modifier = Modifier.width(8.dp))
-
+            
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_heart),
@@ -173,19 +173,19 @@ fun HeartRateScreen() {
                 )
             }
         }
-
+        
         Spacer(modifier = Modifier.height(16.dp))
-
+        
         // Gráfica de ritmo cardíaco
         HeartRateGraph(
-            measurements = uiState.measurements,
+            measurements = uiState.todayMeasurements,
             minValue = uiState.minValue,
             maxValue = uiState.maxValue,
             modifier = Modifier.fillMaxWidth()
         )
-
+        
         Spacer(modifier = Modifier.height(16.dp))
-
+        
         Button(
             onClick = { viewModel.toggleMonitoring() },
             enabled = uiState.sensorAvailable,

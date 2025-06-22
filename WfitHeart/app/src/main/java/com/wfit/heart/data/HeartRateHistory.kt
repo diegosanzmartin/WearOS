@@ -4,12 +4,16 @@ import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.time.LocalDateTime
 import java.time.LocalTime
 
 data class HeartRateMeasurement(
     val value: Int,
+    val timestamp: LocalDateTime
+) {
     val time: LocalTime
-)
+        get() = timestamp.toLocalTime()
+}
 
 class HeartRateHistory(context: Context) {
     private val storage = HeartRateStorage(context)
@@ -37,7 +41,7 @@ class HeartRateHistory(context: Context) {
     }
 
     fun addMeasurement(value: Int) {
-        val measurement = HeartRateMeasurement(value, LocalTime.now())
+        val measurement = HeartRateMeasurement(value, LocalDateTime.now())
         val currentList = _measurements.value.toMutableList()
         currentList.add(measurement)
         
@@ -46,6 +50,13 @@ class HeartRateHistory(context: Context) {
         
         // Actualizar min/max
         updateMinMax(currentList)
+    }
+
+    fun getTodayMeasurements(): List<HeartRateMeasurement> {
+        val now = LocalDateTime.now()
+        return _measurements.value.filter {
+            it.timestamp.toLocalDate() == now.toLocalDate()
+        }
     }
 
     private fun updateMinMax(measurements: List<HeartRateMeasurement>) {

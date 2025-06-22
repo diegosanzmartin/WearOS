@@ -47,6 +47,7 @@ class HeartRateViewModel(application: Application) : AndroidViewModel(applicatio
             heartRateService.history.measurements.collect { measurements ->
                 _uiState.value = _uiState.value.copy(
                     measurements = measurements,
+                    todayMeasurements = heartRateService.history.getTodayMeasurements(),
                     minValue = heartRateService.history.minValue.value,
                     maxValue = heartRateService.history.maxValue.value
                 )
@@ -83,6 +84,7 @@ data class HeartRateUiState(
     val isMonitoring: Boolean = false,
     val sensorAvailable: Boolean = false,
     val measurements: List<HeartRateMeasurement> = emptyList(),
+    val todayMeasurements: List<HeartRateMeasurement> = emptyList(),
     val minValue: Int = 60,
     val maxValue: Int = 143
 ) 
