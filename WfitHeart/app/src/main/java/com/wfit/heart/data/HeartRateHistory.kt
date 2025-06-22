@@ -39,11 +39,6 @@ class HeartRateHistory(context: Context) {
     fun addMeasurement(value: Int) {
         val measurement = HeartRateMeasurement(value, LocalTime.now())
         val currentList = _measurements.value.toMutableList()
-        
-        // Mantener solo las últimas 24 mediciones
-        if (currentList.size >= 24) {
-            currentList.removeAt(0)
-        }
         currentList.add(measurement)
         
         _measurements.value = currentList
@@ -59,12 +54,5 @@ class HeartRateHistory(context: Context) {
             _minValue.value = values.minOrNull() ?: 60
             _maxValue.value = values.maxOrNull() ?: 143
         }
-    }
-
-    fun clear() {
-        _measurements.value = emptyList()
-        storage.clearMeasurements()
-        _minValue.value = 60
-        _maxValue.value = 143
     }
 } 

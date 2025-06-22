@@ -91,7 +91,6 @@ class HeartRateService(private val context: Context) : SensorEventListener, Loca
         sensorManager.unregisterListener(this)
         locationManager.removeUpdates(this)
         _isMonitoring.value = false
-        history.clear()
     }
     
     override fun onSensorChanged(event: SensorEvent?) {

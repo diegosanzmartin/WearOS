@@ -39,10 +39,6 @@ class HeartRateStorage(context: Context) {
         }
     }
 
-    fun clearMeasurements() {
-        prefs.edit().remove(KEY_MEASUREMENTS).apply()
-    }
-
     private data class MeasurementData(
         val value: Int,
         val time: String
