@@ -115,14 +115,26 @@ fun HeartRateScreen() {
         if (uiState.isMonitoring) {
             Chip(
                 onClick = { /* No-op */ },
-                label = { Text(stringResource(id = R.string.monitoring_status)) },
+                label = { 
+                    Text(
+                        text = stringResource(id = R.string.monitoring_status),
+                        fontSize = 7.sp
+                    ) 
+                },
                 colors = ChipDefaults.chipColors(backgroundColor = Color(0xFF4CAF50)),
+                modifier = Modifier.height(24.dp)
             )
         } else if (!uiState.sensorAvailable) {
             Chip(
                 onClick = { /* No-op */ },
-                label = { Text(stringResource(id = R.string.sensor_not_available)) },
+                label = { 
+                    Text(
+                        text = stringResource(id = R.string.sensor_not_available),
+                        fontSize = 7.sp
+                    ) 
+                },
                 colors = ChipDefaults.chipColors(backgroundColor = Color(0xFFF44336)),
+                modifier = Modifier.height(24.dp)
             )
         }
 
@@ -135,9 +147,9 @@ fun HeartRateScreen() {
         ) {
             Text(
                 text = when {
-                    !uiState.sensorAvailable -> "--"
+                    !uiState.sensorAvailable -> stringResource(id = R.string.sensor_na)
                     uiState.heartRate != null -> uiState.heartRate.toString()
-                    else -> "--"
+                    else -> stringResource(id = R.string.no_heart_rate)
                 },
                 style = MaterialTheme.typography.display1,
                 color = Color.White,
@@ -154,7 +166,7 @@ fun HeartRateScreen() {
                     tint = Color.Red
                 )
                 Text(
-                    text = "Bpm",
+                    text = stringResource(id = R.string.heart_rate_unit),
                     style = MaterialTheme.typography.body2,
                     color = MaterialTheme.colors.onBackground
                 )
