@@ -119,7 +119,7 @@ fun HeartRateScreen() {
                 label = { 
                     Text(
                         text = stringResource(id = R.string.monitoring_status),
-                        fontSize = 12.sp
+                        fontSize = 7.sp
                     ) 
                 },
                 colors = ChipDefaults.chipColors(backgroundColor = Color(0xFF4CAF50)),
@@ -131,7 +131,7 @@ fun HeartRateScreen() {
                 label = { 
                     Text(
                         text = stringResource(id = R.string.sensor_not_available),
-                        fontSize = 12.sp
+                        fontSize = 7.sp
                     ) 
                 },
                 colors = ChipDefaults.chipColors(backgroundColor = Color(0xFFF44336)),
@@ -159,11 +159,19 @@ fun HeartRateScreen() {
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            Text(
-                text = stringResource(id = R.string.heart_rate_unit),
-                style = MaterialTheme.typography.body2,
-                color = MaterialTheme.colors.onBackground
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_heart),
+                    contentDescription = "Heart Icon",
+                    modifier = Modifier.size(32.dp),
+                    tint = Color.Red
+                )
+                Text(
+                    text = stringResource(id = R.string.heart_rate_unit),
+                    style = MaterialTheme.typography.body2,
+                    color = MaterialTheme.colors.onBackground
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
