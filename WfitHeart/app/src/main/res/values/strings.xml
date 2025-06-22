@@ -1,12 +1,12 @@
 <resources>
     <string name="app_name">Wfit Heart</string>
-    <string name="heart_rate_title">Heart rate</string>
+    <string name="heart_rate_title">Ritmo cardíaco</string>
     <string name="heart_rate_unit">Bpm</string>
-    <string name="start_monitoring">Star</string>
-    <string name="stop_monitoring">Stop</string>
-    <string name="monitoring_status">Monitoring</string>
-    <string name="stopped_status">Stopped</string>
+    <string name="start_monitoring">Iniciar</string>
+    <string name="stop_monitoring">Detener</string>
+    <string name="monitoring_status">Monitorizando</string>
+    <string name="stopped_status">Detenido</string>
     <string name="no_heart_rate">--</string>
-    <string name="sensor_not_available">Not available</string>
-    <string name="sensor_na">N/A</string>
+    <string name="sensor_not_available">No disponible</string>
+    <string name="sensor_na">N/D</string>
 </resources>

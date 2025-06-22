@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.PathParser
+import com.wfit.heart.presentation.components.HeartRateGraph
 
 class MainActivity : ComponentActivity() {
     
@@ -118,7 +119,7 @@ fun HeartRateScreen() {
                 label = { 
                     Text(
                         text = stringResource(id = R.string.monitoring_status),
-                        fontSize = 7.sp
+                        fontSize = 12.sp
                     ) 
                 },
                 colors = ChipDefaults.chipColors(backgroundColor = Color(0xFF4CAF50)),
@@ -130,7 +131,7 @@ fun HeartRateScreen() {
                 label = { 
                     Text(
                         text = stringResource(id = R.string.sensor_not_available),
-                        fontSize = 7.sp
+                        fontSize = 12.sp
                     ) 
                 },
                 colors = ChipDefaults.chipColors(backgroundColor = Color(0xFFF44336)),
@@ -138,7 +139,7 @@ fun HeartRateScreen() {
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(
             verticalAlignment = Alignment.Bottom,
@@ -158,19 +159,36 @@ fun HeartRateScreen() {
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_heart),
-                    contentDescription = "Heart Icon",
-                    modifier = Modifier.size(32.dp),
-                    tint = Color.Red
-                )
-                Text(
-                    text = stringResource(id = R.string.heart_rate_unit),
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onBackground
-                )
-            }
+            Text(
+                text = stringResource(id = R.string.heart_rate_unit),
+                style = MaterialTheme.typography.body2,
+                color = MaterialTheme.colors.onBackground
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Gráfica de ritmo cardíaco
+        HeartRateGraph(
+            measurements = uiState.measurements,
+            minValue = uiState.minValue,
+            maxValue = uiState.maxValue,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = { viewModel.toggleMonitoring() },
+            enabled = uiState.sensorAvailable,
+            modifier = Modifier.size(ButtonDefaults.LargeButtonSize)
+        ) {
+            Text(
+                text = if (uiState.isMonitoring) 
+                    stringResource(id = R.string.stop_monitoring)
+                else 
+                    stringResource(id = R.string.start_monitoring)
+            )
         }
     }
 }

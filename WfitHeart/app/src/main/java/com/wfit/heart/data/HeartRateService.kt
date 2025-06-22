@@ -33,6 +33,8 @@ class HeartRateService(private val context: Context) : SensorEventListener, Loca
     private var heartRateSensor: Sensor? = null
     private var lastHeartRateUpdate = 0L
     
+    val history = HeartRateHistory()
+    
     init {
         setupSensors()
     }
@@ -89,6 +91,7 @@ class HeartRateService(private val context: Context) : SensorEventListener, Loca
         sensorManager.unregisterListener(this)
         locationManager.removeUpdates(this)
         _isMonitoring.value = false
+        history.clear()
     }
     
     override fun onSensorChanged(event: SensorEvent?) {
@@ -100,6 +103,7 @@ class HeartRateService(private val context: Context) : SensorEventListener, Loca
                         val heartRateValue = it.values[0].toInt()
                         if (heartRateValue > 0 && heartRateValue < 300) { // Valores válidos
                             _heartRate.value = heartRateValue
+                            history.addMeasurement(heartRateValue)
                             lastHeartRateUpdate = currentTime
                         }
                     }
@@ -113,6 +117,7 @@ class HeartRateService(private val context: Context) : SensorEventListener, Loca
                             val heartRateValue = it.values[0].toInt()
                             if (heartRateValue > 0 && heartRateValue < 300) {
                                 _heartRate.value = heartRateValue
+                                history.addMeasurement(heartRateValue)
                                 lastHeartRateUpdate = currentTime
                             }
                         }
