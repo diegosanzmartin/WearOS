@@ -32,8 +32,14 @@ class HeartRateService(private val context: Context) : SensorEventListener, Loca
     
     private var heartRateSensor: Sensor? = null
     private var lastHeartRateUpdate = 0L
+    private var lastDataSave = 0L
+    private var isAppVisible = false
     
     val history = HeartRateHistory(context)
+    
+    companion object {
+        private const val SAVE_INTERVAL_MS = 15 * 60 * 1000L // 15 minutes in milliseconds
+    }
     
     init {
         setupSensors()
@@ -93,31 +99,48 @@ class HeartRateService(private val context: Context) : SensorEventListener, Loca
         _isMonitoring.value = false
     }
     
+    fun setAppVisible(visible: Boolean) {
+        isAppVisible = visible
+    }
+    
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let {
             when (it.sensor.type) {
                 Sensor.TYPE_HEART_RATE -> {
                     val currentTime = System.currentTimeMillis()
-                    if (currentTime - lastHeartRateUpdate > 1000) { // Actualizar máximo cada segundo
-                        val heartRateValue = it.values[0].toInt()
-                        if (heartRateValue > 0 && heartRateValue < 300) { // Valores válidos
+                    val heartRateValue = it.values[0].toInt()
+                    
+                    if (heartRateValue > 0 && heartRateValue < 300) {
+                        // Siempre actualizar UI si la app está visible
+                        if (isAppVisible && currentTime - lastHeartRateUpdate > 1000) {
                             _heartRate.value = heartRateValue
-                            history.addMeasurement(heartRateValue)
                             lastHeartRateUpdate = currentTime
+                        }
+                        
+                        // Guardar datos solo cada 15 minutos
+                        if (currentTime - lastDataSave >= SAVE_INTERVAL_MS) {
+                            history.addMeasurement(heartRateValue)
+                            lastDataSave = currentTime
                         }
                     }
                 }
                 else -> {
-                    // Para otros sensores que puedan ser de ritmo cardíaco
                     if (it.sensor.name.contains("heart", ignoreCase = true) || 
                         it.sensor.name.contains("cardiac", ignoreCase = true)) {
                         val currentTime = System.currentTimeMillis()
-                        if (currentTime - lastHeartRateUpdate > 1000) {
-                            val heartRateValue = it.values[0].toInt()
-                            if (heartRateValue > 0 && heartRateValue < 300) {
+                        val heartRateValue = it.values[0].toInt()
+                        
+                        if (heartRateValue > 0 && heartRateValue < 300) {
+                            // Siempre actualizar UI si la app está visible
+                            if (isAppVisible && currentTime - lastHeartRateUpdate > 1000) {
                                 _heartRate.value = heartRateValue
-                                history.addMeasurement(heartRateValue)
                                 lastHeartRateUpdate = currentTime
+                            }
+                            
+                            // Guardar datos solo cada 15 minutos
+                            if (currentTime - lastDataSave >= SAVE_INTERVAL_MS) {
+                                history.addMeasurement(heartRateValue)
+                                lastDataSave = currentTime
                             }
                         }
                     }

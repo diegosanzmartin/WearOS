@@ -67,6 +67,16 @@ class MainActivity : ComponentActivity() {
         checkAndRequestPermissions()
     }
     
+    override fun onResume() {
+        super.onResume()
+        viewModel.setAppVisible(true)
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        viewModel.setAppVisible(false)
+    }
+    
     private fun checkAndRequestPermissions() {
         val permissions = arrayOf(
             Manifest.permission.BODY_SENSORS,
@@ -176,9 +186,9 @@ fun HeartRateScreen() {
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        // Gráfica de ritmo cardíaco
+        // Gráfica de ritmo cardíaco con promedios por hora
         HeartRateGraph(
-            measurements = uiState.todayMeasurements,
+            hourlyAverages = uiState.hourlyAverages,
             minValue = uiState.minValue,
             maxValue = uiState.maxValue,
             modifier = Modifier.fillMaxWidth()

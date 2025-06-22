@@ -12,12 +12,11 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.wfit.heart.data.HeartRateMeasurement
-import java.time.LocalTime
+import com.wfit.heart.data.HourlyAverage
 
 @Composable
 fun HeartRateGraph(
-    measurements: List<HeartRateMeasurement>,
+    hourlyAverages: List<HourlyAverage>,
     minValue: Int,
     maxValue: Int,
     modifier: Modifier = Modifier
@@ -57,12 +56,11 @@ fun HeartRateGraph(
                 )
             }
             
-            // Dibujar la línea de mediciones
-            if (measurements.isNotEmpty()) {
-                val points = measurements.map { measurement ->
-                    val hourOfDay = measurement.time.hour + (measurement.time.minute / 60f)
-                    val x = (hourOfDay / 24f) * width
-                    val normalizedValue = (measurement.value - minValue).toFloat() / (maxValue - minValue)
+            // Dibujar puntos y líneas de promedios por hora
+            if (hourlyAverages.isNotEmpty()) {
+                val points = hourlyAverages.map { average ->
+                    val x = (average.hour / 24f) * width
+                    val normalizedValue = (average.averageValue - minValue).toFloat() / (maxValue - minValue)
                     val y = height - (normalizedValue * height)
                     Offset(x, y)
                 }.sortedBy { it.x }
@@ -82,7 +80,7 @@ fun HeartRateGraph(
                 points.forEach { point ->
                     drawCircle(
                         color = Color.White,
-                        radius = 3f,
+                        radius = 4f,
                         center = point
                     )
                 }

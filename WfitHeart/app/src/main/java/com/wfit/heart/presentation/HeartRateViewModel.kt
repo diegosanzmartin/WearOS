@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.wfit.heart.data.HeartRateService
 import com.wfit.heart.data.HeartRateMeasurement
+import com.wfit.heart.data.HourlyAverage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,12 +48,22 @@ class HeartRateViewModel(application: Application) : AndroidViewModel(applicatio
             heartRateService.history.measurements.collect { measurements ->
                 _uiState.value = _uiState.value.copy(
                     measurements = measurements,
-                    todayMeasurements = heartRateService.history.getTodayMeasurements(),
+                    hourlyAverages = heartRateService.history.hourlyAverages.value,
                     minValue = heartRateService.history.minValue.value,
                     maxValue = heartRateService.history.maxValue.value
                 )
             }
         }
+        
+        viewModelScope.launch {
+            heartRateService.history.hourlyAverages.collect { averages ->
+                _uiState.value = _uiState.value.copy(hourlyAverages = averages)
+            }
+        }
+    }
+    
+    fun setAppVisible(visible: Boolean) {
+        heartRateService.setAppVisible(visible)
     }
     
     fun startMonitoring() {
@@ -84,7 +95,7 @@ data class HeartRateUiState(
     val isMonitoring: Boolean = false,
     val sensorAvailable: Boolean = false,
     val measurements: List<HeartRateMeasurement> = emptyList(),
-    val todayMeasurements: List<HeartRateMeasurement> = emptyList(),
+    val hourlyAverages: List<HourlyAverage> = emptyList(),
     val minValue: Int = 60,
     val maxValue: Int = 143
 ) 
