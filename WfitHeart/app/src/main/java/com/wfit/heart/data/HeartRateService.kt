@@ -33,7 +33,7 @@ class HeartRateService(private val context: Context) : SensorEventListener, Loca
     private var heartRateSensor: Sensor? = null
     private var lastHeartRateUpdate = 0L
     
-    val history = HeartRateHistory()
+    val history = HeartRateHistory(context)
     
     init {
         setupSensors()

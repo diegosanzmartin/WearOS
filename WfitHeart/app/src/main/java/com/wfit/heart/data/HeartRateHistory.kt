@@ -1,5 +1,6 @@
 package com.wfit.heart.data
 
+import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,7 +11,9 @@ data class HeartRateMeasurement(
     val time: LocalTime
 )
 
-class HeartRateHistory {
+class HeartRateHistory(context: Context) {
+    private val storage = HeartRateStorage(context)
+    
     private val _measurements = MutableStateFlow<List<HeartRateMeasurement>>(emptyList())
     val measurements: StateFlow<List<HeartRateMeasurement>> = _measurements.asStateFlow()
 
@@ -19,6 +22,19 @@ class HeartRateHistory {
 
     private val _maxValue = MutableStateFlow(143)
     val maxValue: StateFlow<Int> = _maxValue.asStateFlow()
+
+    init {
+        // Cargar mediciones guardadas al iniciar
+        loadSavedMeasurements()
+    }
+
+    private fun loadSavedMeasurements() {
+        val savedMeasurements = storage.loadMeasurements()
+        if (savedMeasurements.isNotEmpty()) {
+            _measurements.value = savedMeasurements
+            updateMinMax(savedMeasurements)
+        }
+    }
 
     fun addMeasurement(value: Int) {
         val measurement = HeartRateMeasurement(value, LocalTime.now())
@@ -31,6 +47,7 @@ class HeartRateHistory {
         currentList.add(measurement)
         
         _measurements.value = currentList
+        storage.saveMeasurements(currentList)
         
         // Actualizar min/max
         updateMinMax(currentList)
@@ -46,6 +63,7 @@ class HeartRateHistory {
 
     fun clear() {
         _measurements.value = emptyList()
+        storage.clearMeasurements()
         _minValue.value = 60
         _maxValue.value = 143
     }
